@@ -29,7 +29,7 @@ export function RoadmapClient({ milestones, tasks, sprints }: { milestones: Mile
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex-1">
           <h1 className="text-xl font-semibold">Technical roadmap</h1>
-          <p className="text-xs text-muted">Milestone dates are proposed internal plans that leads can move — not external deadlines. Completion counts review-approved tasks only.</p>
+          <p className="text-[13px] text-muted">Milestone dates are proposed internal plans that leads can move — not external deadlines. Completion counts review-approved tasks only.</p>
         </div>
         {can("milestone.manage") && <CreateMilestone />}
       </div>
@@ -39,16 +39,16 @@ export function RoadmapClient({ milestones, tasks, sprints }: { milestones: Mile
           <div className="absolute top-12 right-0 left-0 h-px bg-line-strong" />
           {sprints.map((s) => (
             <div key={s.id} className="absolute top-9 h-6 rounded bg-info-soft ring-1 ring-info/30" style={{ left: x(parseDay(s.startDate)), width: `calc(${x(parseDay(s.endDate))} - ${x(parseDay(s.startDate))})` }} title={s.name}>
-              <span className="absolute -top-5 left-0 text-[10px] whitespace-nowrap text-info">{s.name.split("—")[0]}</span>
+              <span className="absolute -top-5 left-0 text-xs whitespace-nowrap text-info">{s.name.split("—")[0]}</span>
             </div>
           ))}
           {milestones.map((m) => (
             <div key={m.id} className="absolute top-10" style={{ left: x(parseDay(m.targetDate)) }}>
               <div className="-ml-1.5 size-3 rotate-45 border-2 border-accent bg-bg" />
-              <div className="mt-2 -ml-6 w-28 text-[10px] leading-tight"><div className="font-semibold text-fg">{m.name.split("·")[0]}</div><div className="text-muted">{day(m.targetDate)}</div></div>
+              <div className="mt-2 -ml-6 w-28 text-xs leading-tight"><div className="font-semibold text-fg">{m.name.split("·")[0]}</div><div className="text-muted">{day(m.targetDate)}</div></div>
             </div>
           ))}
-          <div className="absolute top-6 bottom-0 w-px bg-accent/60" style={{ left: x(today) }}><span className="absolute -top-4 -left-3 text-[9px] text-accent">today</span></div>
+          <div className="absolute top-6 bottom-0 w-px bg-accent/60" style={{ left: x(today) }}><span className="absolute -top-4 -left-3 text-[11px] text-accent">today</span></div>
         </div>
       </Panel>
 
@@ -61,26 +61,26 @@ export function RoadmapClient({ milestones, tasks, sprints }: { milestones: Mile
               <div className="flex flex-wrap items-center gap-3 border-b border-line px-4 py-2.5">
                 <Flag className="size-4 text-accent" />
                 <div className="min-w-0 flex-1">
-                  <h2 className="text-sm font-semibold">{m.name}</h2>
-                  <p className="text-[11px] text-muted">{m.description}</p>
+                  <h2 className="text-[15px] font-semibold">{m.name}</h2>
+                  <p className="text-[13px] text-muted">{m.description}</p>
                 </div>
                 <Badge tone="warn">{m.status}</Badge>
-                <span className="font-mono text-xs text-muted">{day(m.targetDate, "MMM d, yyyy")}</span>
-                <div className="flex w-40 items-center gap-2"><Progress value={pct(done, mt.length)} tone="ok" /><span className="font-mono text-[10px] text-muted">{done}/{mt.length}</span></div>
+                <span className="font-mono text-[13px] text-muted">{day(m.targetDate, "MMM d, yyyy")}</span>
+                <div className="flex w-40 items-center gap-2"><Progress value={pct(done, mt.length)} tone="ok" /><span className="font-mono text-xs text-muted">{done}/{mt.length}</span></div>
               </div>
               <div className="grid gap-px bg-line md:grid-cols-7">
                 {tracks.map((tr) => {
                   const list = mt.filter((t) => t.trackId === (tr.id as TrackId));
                   return (
                     <div key={tr.id} className="bg-panel p-2">
-                      <div className="mb-1 font-mono text-[10px] font-semibold" style={{ color: tr.color }}>{tr.id}</div>
+                      <div className="mb-1 font-mono text-xs font-semibold" style={{ color: tr.color }}>{tr.id}</div>
                       <div className="flex flex-wrap gap-1">
                         {list.map((t) => (
-                          <Link key={t.id} href={`/tasks/${t.key}`} title={`${t.key} ${t.title} — ${t.status}`} className="inline-flex items-center gap-1 rounded border border-line bg-panel-2 px-1.5 py-0.5 font-mono text-[10px] text-fg-2 hover:border-line-strong">
+                          <Link key={t.id} href={`/tasks/${t.key}`} title={`${t.key} ${t.title} — ${t.status}`} className="inline-flex items-center gap-1 rounded border border-line bg-panel-2 px-1.5 py-0.5 font-mono text-xs text-fg-2 hover:border-line-strong">
                             <span className={cn("size-1.5 rounded-full", STATUS_DOT[t.status])} />{t.key}
                           </Link>
                         ))}
-                        {!list.length && <span className="text-[10px] text-faint">—</span>}
+                        {!list.length && <span className="text-xs text-faint">—</span>}
                       </div>
                     </div>
                   );
@@ -104,7 +104,7 @@ function CreateMilestone() {
         <Field label="Name"><Input name="name" required /></Field>
         <Field label="Target date (proposed)"><Input name="date" type="date" required /></Field>
         <Field label="Description"><Textarea name="desc" /></Field>
-        <fieldset className="flex flex-wrap gap-2 text-xs">{tracks.map((t) => <label key={t.id} className="flex items-center gap-1"><input type="checkbox" name="tracks" value={t.id} /> {t.id}</label>)}</fieldset>
+        <fieldset className="flex flex-wrap gap-2 text-[13px]">{tracks.map((t) => <label key={t.id} className="flex items-center gap-1"><input type="checkbox" name="tracks" value={t.id} /> {t.id}</label>)}</fieldset>
         <div className="flex justify-end"><Button type="submit" variant="primary" disabled={pending}>Create</Button></div>
       </form>
     </Dialog>

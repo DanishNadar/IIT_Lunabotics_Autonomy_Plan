@@ -22,9 +22,9 @@ export function ExperimentDetail({ experiment: e, taskKey, metrics, tasks }: { e
     <div className="mx-auto max-w-[1100px] space-y-4 p-4">
       <div className="flex flex-wrap items-start gap-3">
         <div className="min-w-0 flex-1">
-          <Link href="/experiments" className="text-[11px] text-muted hover:text-fg">Experiments /</Link>
+          <Link href="/experiments" className="text-[13px] text-muted hover:text-fg">Experiments /</Link>
           <h1 className="text-xl font-semibold">{e.name}</h1>
-          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted">
+          <div className="mt-1 flex flex-wrap items-center gap-2 text-[13px] text-muted">
             <TrackChip trackId={e.trackId} withName />
             {taskKey && <TaskLink k={taskKey} />}
             <Badge tone={e.status === "complete" ? "ok" : "info"}>{e.status}</Badge>
@@ -39,10 +39,10 @@ export function ExperimentDetail({ experiment: e, taskKey, metrics, tasks }: { e
       ) : (
         <>
           <div className="grid gap-4 md:grid-cols-2">
-            <Panel><PanelHeader title="Hypothesis" /><p className="p-3 text-xs text-fg-2">{e.hypothesis || "—"}</p></Panel>
+            <Panel><PanelHeader title="Hypothesis" /><p className="p-3 text-[13px] text-fg-2">{e.hypothesis || "—"}</p></Panel>
             <Panel>
               <PanelHeader title="Setup" />
-              <dl className="grid grid-cols-[100px_1fr] gap-y-1 p-3 text-xs">
+              <dl className="grid grid-cols-[100px_1fr] gap-y-1 p-3 text-[13px]">
                 <dt className="text-muted">Environment</dt><dd>{e.environment || "—"}</dd>
                 <dt className="text-muted">Commit</dt><dd className="font-mono">{e.commit || "—"}</dd>
                 <dt className="text-muted">Dataset</dt><dd>{e.dataset || "—"}</dd>
@@ -52,8 +52,8 @@ export function ExperimentDetail({ experiment: e, taskKey, metrics, tasks }: { e
           </div>
           <Panel>
             <PanelHeader title="Metrics" />
-            <table className="w-full text-xs">
-              <thead><tr className="border-b border-line text-left text-[10px] text-muted uppercase"><th className="px-3 py-1.5">Metric</th><th>Value</th><th>Definition</th><th className="pr-3">Provenance</th></tr></thead>
+            <table className="w-full text-[13px]">
+              <thead><tr className="border-b border-line text-left text-xs text-muted uppercase"><th className="px-3 py-1.5">Metric</th><th>Value</th><th>Definition</th><th className="pr-3">Provenance</th></tr></thead>
               <tbody>
                 {e.metrics.map((m) => {
                   const d = def.get(m.metricKey);
@@ -64,12 +64,12 @@ export function ExperimentDetail({ experiment: e, taskKey, metrics, tasks }: { e
             </table>
           </Panel>
           <div className="grid gap-4 md:grid-cols-3">
-            <Panel><PanelHeader title="Results" /><p className="p-3 text-xs whitespace-pre-wrap text-fg-2">{e.results || "—"}</p></Panel>
-            <Panel><PanelHeader title="Notes" /><p className="p-3 text-xs whitespace-pre-wrap text-fg-2">{e.notes || "—"}</p></Panel>
-            <Panel><PanelHeader title="Conclusions" /><p className="p-3 text-xs whitespace-pre-wrap text-fg-2">{e.conclusions || "—"}</p></Panel>
+            <Panel><PanelHeader title="Results" /><p className="p-3 text-[13px] whitespace-pre-wrap text-fg-2">{e.results || "—"}</p></Panel>
+            <Panel><PanelHeader title="Notes" /><p className="p-3 text-[13px] whitespace-pre-wrap text-fg-2">{e.notes || "—"}</p></Panel>
+            <Panel><PanelHeader title="Conclusions" /><p className="p-3 text-[13px] whitespace-pre-wrap text-fg-2">{e.conclusions || "—"}</p></Panel>
           </div>
           {e.artifacts.length > 0 && (
-            <Panel><PanelHeader title="Artifacts" /><ul className="p-3 text-xs">{e.artifacts.map((a) => <li key={a.url}><a href={a.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-info hover:underline"><ExternalLink className="size-3" />{a.label || a.url}</a></li>)}</ul></Panel>
+            <Panel><PanelHeader title="Artifacts" /><ul className="p-3 text-[13px]">{e.artifacts.map((a) => <li key={a.url}><a href={a.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-info hover:underline"><ExternalLink className="size-3" />{a.label || a.url}</a></li>)}</ul></Panel>
           )}
         </>
       )}

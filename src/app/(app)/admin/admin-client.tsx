@@ -19,9 +19,9 @@ interface Props {
 
 function Status({ ok, label, hint }: { ok: boolean; label: string; hint: string }) {
   return (
-    <li className="flex items-start gap-2 px-3 py-2 text-xs">
+    <li className="flex items-start gap-2 px-3 py-2 text-[13px]">
       {ok ? <CheckCircle2 className="mt-0.5 size-3.5 text-ok" /> : <XCircle className="mt-0.5 size-3.5 text-faint" />}
-      <div><div className="text-fg">{label}</div><div className="text-[11px] text-muted">{hint}</div></div>
+      <div><div className="text-fg">{label}</div><div className="text-[13px] text-muted">{hint}</div></div>
     </li>
   );
 }
@@ -39,8 +39,8 @@ export function AdminClient({ members, settings, integrations, counts }: Props) 
         <Panel>
           <PanelHeader title="Members & roles" icon={<UserCog />} subtitle="Roles are enforced on the server for every command" />
           <div className="overflow-x-auto">
-            <table className="w-full text-xs">
-              <thead><tr className="border-b border-line text-left text-[10px] text-muted uppercase"><th className="px-3 py-1.5">Member</th><th>Role</th><th>Leads tracks</th><th>Status</th><th className="pr-3" /></tr></thead>
+            <table className="w-full text-[13px]">
+              <thead><tr className="border-b border-line text-left text-xs text-muted uppercase"><th className="px-3 py-1.5">Member</th><th>Role</th><th>Leads tracks</th><th>Status</th><th className="pr-3" /></tr></thead>
               <tbody>
                 {members.map((m) => (
                   <MemberRow key={m.id} m={m} self={m.id === actor.id} />
@@ -77,7 +77,7 @@ export function AdminClient({ members, settings, integrations, counts }: Props) 
                 <Field label="Discord (optional)"><Input name="discord" /></Field>
                 <Field label="GitHub username (optional)"><Input name="github" /></Field>
               </div>
-              <fieldset className="flex flex-wrap gap-2 text-[11px] text-muted"><span>Track lead of:</span>{tracks.map((t) => <label key={t.id} className="flex items-center gap-1"><input type="checkbox" name="tracks" value={t.id} />{t.id}</label>)}</fieldset>
+              <fieldset className="flex flex-wrap gap-2 text-[13px] text-muted"><span>Track lead of:</span>{tracks.map((t) => <label key={t.id} className="flex items-center gap-1"><input type="checkbox" name="tracks" value={t.id} />{t.id}</label>)}</fieldset>
               <Button type="submit" variant="primary" disabled={pending}><UserPlus /> Add member</Button>
             </form>
           </Panel>
@@ -105,7 +105,7 @@ export function AdminClient({ members, settings, integrations, counts }: Props) 
               <Status ok={integrations.sessionSecret} label="Session secret" hint="SESSION_SECRET signs the admin session cookie; required in production" />
               <Status ok={!integrations.demoAccounts} label={integrations.demoAccounts ? "Demo accounts are ENABLED" : "Demo accounts disabled"} hint="DEMO_ACCOUNTS=false hides and disables the labeled demo identities" />
             </ul>
-            <div className="border-t border-line p-3 text-[11px] text-muted">{counts.tasks} tasks · {counts.resources} resources · {counts.documents} documents · {counts.audit} audit events</div>
+            <div className="border-t border-line p-3 text-[13px] text-muted">{counts.tasks} tasks · {counts.resources} resources · {counts.documents} documents · {counts.audit} audit events</div>
             {integrations.storage.kind !== "supabase" && (
               <div className="border-t border-line p-3">
                 <Button variant="danger" size="sm" disabled={busy} onClick={() => confirm("Reset ALL data on this server to the seed? Members, progress and comments will be lost.") && start(async () => { const r = await resetDemoData(); toast(r.ok ? "ok" : "error", r.ok ? "Data reset to seed." : r.error ?? "Failed"); })}><RotateCcw /> Reset local data to seed</Button>
@@ -126,9 +126,9 @@ function MemberRow({ m, self }: { m: PublicMember; self: boolean }) {
   const dirty = role !== m.role || leads.join() !== m.leadTrackIds.join();
   return (
     <tr className="border-b border-line align-middle last:border-0">
-      <td className="px-3 py-1.5"><div className="flex items-center gap-2"><Avatar name={m.name} color={m.avatarColor} size={20} /><div><div className="text-fg">{m.name}{self && " (you)"}</div><div className="text-[10px] text-muted">{m.email}{m.isDemo && " · demo"}</div></div></div></td>
-      <td><Select value={role} onChange={(e) => setRole(e.target.value as Role)} className="h-7 w-36 text-xs" aria-label={`Role for ${m.name}`}>{ROLES.map((r) => <option key={r} value={r}>{ROLE_LABEL[r]}</option>)}</Select></td>
-      <td>{role === "track_lead" ? <div className="flex flex-wrap gap-1">{tracks.map((t) => <label key={t.id} className="flex items-center gap-0.5 text-[10px]"><input type="checkbox" checked={leads.includes(t.id)} onChange={() => setLeads(leads.includes(t.id) ? leads.filter((x) => x !== t.id) : [...leads, t.id])} />{t.id}</label>)}</div> : <span className="text-faint">—</span>}</td>
+      <td className="px-3 py-1.5"><div className="flex items-center gap-2"><Avatar name={m.name} color={m.avatarColor} size={20} /><div><div className="text-fg">{m.name}{self && " (you)"}</div><div className="text-xs text-muted">{m.email}{m.isDemo && " · demo"}</div></div></div></td>
+      <td><Select value={role} onChange={(e) => setRole(e.target.value as Role)} className="h-7 w-36 text-[13px]" aria-label={`Role for ${m.name}`}>{ROLES.map((r) => <option key={r} value={r}>{ROLE_LABEL[r]}</option>)}</Select></td>
+      <td>{role === "track_lead" ? <div className="flex flex-wrap gap-1">{tracks.map((t) => <label key={t.id} className="flex items-center gap-0.5 text-xs"><input type="checkbox" checked={leads.includes(t.id)} onChange={() => setLeads(leads.includes(t.id) ? leads.filter((x) => x !== t.id) : [...leads, t.id])} />{t.id}</label>)}</div> : <span className="text-faint">—</span>}</td>
       <td>{m.active ? <Badge tone="ok">active</Badge> : <Badge>deactivated</Badge>}</td>
       <td className="pr-3 text-right whitespace-nowrap">
         {dirty && <Button size="xs" variant="primary" onClick={() => run({ type: "member.setRole", memberId: m.id, role, leadTrackIds: leads })}><Shield /> Save</Button>}

@@ -38,9 +38,9 @@ function MultiSelect<T extends string>({ label, options, value, onChange }: { la
       align="start"
       className="w-60 p-1"
       trigger={
-        <button className={cn("inline-flex h-7 items-center gap-1 rounded-md border px-2 text-xs", sel.length ? "border-info/40 bg-info-soft text-info" : "border-line bg-panel text-fg-2 hover:border-line-strong")}>
+        <button className={cn("inline-flex h-7 items-center gap-1 rounded-md border px-2 text-[13px]", sel.length ? "border-info/40 bg-info-soft text-info" : "border-line bg-panel text-fg-2 hover:border-line-strong")}>
           {label}
-          {sel.length > 0 && <span className="font-mono text-[10px]">{sel.length}</span>}
+          {sel.length > 0 && <span className="font-mono text-xs">{sel.length}</span>}
           <ChevronDown className="size-3 opacity-60" />
         </button>
       }
@@ -49,7 +49,7 @@ function MultiSelect<T extends string>({ label, options, value, onChange }: { la
         {options.map((o) => {
           const on = sel.includes(o.value);
           return (
-            <button key={o.value} onClick={() => onChange(on ? sel.filter((x) => x !== o.value) : [...sel, o.value])} className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-fg-2 hover:bg-panel-3" role="menuitemcheckbox" aria-checked={on}>
+            <button key={o.value} onClick={() => onChange(on ? sel.filter((x) => x !== o.value) : [...sel, o.value])} className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-[13px] text-fg-2 hover:bg-panel-3" role="menuitemcheckbox" aria-checked={on}>
               <span className={cn("flex size-3.5 items-center justify-center rounded border", on ? "border-info bg-info text-bg" : "border-line-strong")}>{on && <Check className="size-2.5" />}</span>
               <span className="min-w-0 flex-1 truncate">{o.label}</span>
             </button>
@@ -57,7 +57,7 @@ function MultiSelect<T extends string>({ label, options, value, onChange }: { la
         })}
       </div>
       {sel.length > 0 && (
-        <button onClick={() => onChange([])} className="mt-1 w-full border-t border-line px-2 py-1.5 text-left text-[11px] text-muted hover:text-fg">
+        <button onClick={() => onChange([])} className="mt-1 w-full border-t border-line px-2 py-1.5 text-left text-[13px] text-muted hover:text-fg">
           Clear
         </button>
       )}
@@ -72,7 +72,7 @@ export function FilterBar({ filters, onChange }: { filters: BoardFilters; onChan
   const visibleSubtracks = subtracks.filter((s) => !filters.trackIds?.length || filters.trackIds.includes(s.trackId));
   return (
     <div className="flex flex-wrap items-center gap-1.5">
-      <div className="flex rounded-md border border-line bg-panel p-0.5 text-xs">
+      <div className="flex rounded-md border border-line bg-panel p-0.5 text-[13px]">
         {(["initial", "advanced", "all", "archived"] as const).map((b) => (
           <button key={b} onClick={() => set("backlog", b)} className={cn("rounded px-2 py-0.5", (filters.backlog ?? "initial") === b ? "bg-panel-3 text-fg" : "text-muted hover:text-fg")} title={b === "archived" ? "Out-of-scope tasks owned by other teams, kept for history" : undefined}>
             {b === "initial" ? "Initial" : b === "advanced" ? "Advanced backlog" : b === "all" ? "All active" : "Archived"}
@@ -88,7 +88,7 @@ export function FilterBar({ filters, onChange }: { filters: BoardFilters; onChan
       <MultiSelect label="Sprint" options={[{ value: "__none", label: "No sprint" }, ...sprints.map((s) => ({ value: s.id, label: s.name }))]} value={filters.sprintIds} onChange={(v) => set("sprintIds", v)} />
       <MultiSelect label="Milestone" options={[{ value: "__none", label: "No milestone" }, ...milestones.map((m) => ({ value: m.id, label: m.name }))]} value={filters.milestoneIds} onChange={(v) => set("milestoneIds", v)} />
       {active && (
-        <button onClick={() => onChange({ q: filters.q, backlog: "initial" })} className="inline-flex h-7 items-center gap-1 px-1.5 text-[11px] text-muted hover:text-fg">
+        <button onClick={() => onChange({ q: filters.q, backlog: "initial" })} className="inline-flex h-7 items-center gap-1 px-1.5 text-[13px] text-muted hover:text-fg">
           <X className="size-3" /> Reset
         </button>
       )}

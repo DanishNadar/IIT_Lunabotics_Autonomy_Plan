@@ -13,19 +13,19 @@ export default function SetupPage() {
   return (
     <main className="mx-auto max-w-xl px-4 py-16 text-fg">
       <h1 className="text-xl font-semibold">Deployment needs a database</h1>
-      <p className="mt-3 text-sm text-fg-2">
+      <p className="mt-3 text-[15px] text-fg-2">
         This Vercel deployment has no Supabase configuration. Vercel&apos;s filesystem is read-only and not shared between instances, so the app will not store team data there.
       </p>
-      <h2 className="mt-6 text-sm font-semibold">Missing environment variables</h2>
-      <ul className="mt-2 space-y-1 font-mono text-sm">
+      <h2 className="mt-6 text-[15px] font-semibold">Missing environment variables</h2>
+      <ul className="mt-2 space-y-1 font-mono text-[15px]">
         {missing.map((name) => <li key={name}>{name}</li>)}
       </ul>
-      <ol className="mt-6 list-decimal space-y-2 pl-5 text-sm text-fg-2">
+      <ol className="mt-6 list-decimal space-y-2 pl-5 text-[15px] text-fg-2">
         <li>Create a Supabase project. Apply <code>supabase/migrations/*</code>, then load <code>supabase/seed.sql</code>.</li>
         <li>In Vercel → Project → Settings → Environment Variables, add the variables above, <code>ADMIN_PASSWORD</code> and <code>SESSION_SECRET</code>.</li>
         <li>Redeploy. Vercel builds <code>NEXT_PUBLIC_</code> values into the app, so they take effect only after a new build.</li>
       </ol>
-      <p className="mt-6 text-sm text-fg-2">See the README section “Deployment (Vercel)” for details.</p>
+      <p className="mt-6 text-[15px] text-fg-2">See the README section “Deployment (Vercel)” for details.</p>
     </main>
   );
 }

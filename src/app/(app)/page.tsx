@@ -5,7 +5,9 @@ import { sprintStats } from "@/lib/domain/sprint";
 import { isActive } from "@/lib/domain/status";
 import { summarizeTasks } from "@/lib/domain/views";
 import { loadContext } from "@/lib/server/data";
+import { DIFFICULTIES } from "@/lib/domain/types";
 import { OverviewClient } from "./overview-client";
+import type { OverviewVisuals } from "./overview-visuals";
 
 export const metadata = { title: "Overview" };
 
@@ -76,8 +78,44 @@ export default async function OverviewPage() {
     })
     .sort((a, b) => b.downstream.length - a.downstream.length);
 
+  const statusGroups: [string, string, (s: string) => boolean][] = [
+    ["Available", "var(--info)", (s) => s === "available"],
+    ["Backlog", "var(--line-strong)", (s) => s === "backlog"],
+    ["Assigned", "color-mix(in srgb, var(--violet) 55%, transparent)", (s) => s === "assigned"],
+    ["In progress", "var(--violet)", (s) => WIP.includes(s)],
+    ["Blocked", "var(--danger)", (s) => s === "blocked"],
+    ["Testing", "var(--warn)", (s) => s === "testing"],
+    ["In review", "color-mix(in srgb, var(--info) 60%, var(--ok))", (s) => s === "in_review"],
+    ["Done", "var(--ok)", (s) => s === "completed"],
+  ];
+  const inProgress = active.filter((t) => WIP.includes(t.status) || t.status === "testing" || t.status === "assigned").length;
+  const visuals: OverviewVisuals = {
+    overallPct: active.length ? Math.round((stats.completed / active.length) * 100) : 0,
+    checklistPct: checklistProgress(db.checklistItems.filter((c) => active.some((t) => t.id === c.taskId))).pct,
+    inProgress,
+    activeTotal: active.length,
+    completed: stats.completed,
+    totalHours: active.reduce((n, t) => n + t.estimateHours, 0),
+    status: statusGroups.map(([name, color, pred]) => ({ name, color, value: active.filter((t) => pred(t.status)).length })),
+    hoursByTrack: db.tracks.map((tr) => {
+      const row = { track: `${tr.emoji} ${tr.id}`, beginner: 0, intermediate: 0, advanced: 0, expert: 0 };
+      for (const t of active.filter((x) => x.trackId === tr.id)) row[t.difficulty] += t.estimateHours;
+      return row;
+    }),
+    categories: trackHealth.map((t) => ({
+      id: t.id, name: t.name, emoji: t.emoji, channel: t.channel, color: t.color, total: t.total, completed: t.completed,
+      inProgress: t.assigned + t.wip + t.testing + t.review, available: t.available, pct: t.total ? Math.round((t.completed / t.total) * 100) : 0,
+    })),
+    firstTasks: initial
+      .filter((t) => t.status === "available" && (t.difficulty === "beginner" || t.difficulty === "intermediate"))
+      .sort((a, b) => DIFFICULTIES.indexOf(a.difficulty) - DIFFICULTIES.indexOf(b.difficulty) || a.estimateHours - b.estimateHours)
+      .slice(0, 6)
+      .map((t) => ({ key: t.key, title: t.title, emoji: db.tracks.find((tr) => tr.id === t.trackId)?.emoji ?? "", difficulty: t.difficulty, estimateHours: t.estimateHours })),
+  };
+
   return (
     <OverviewClient
+      visuals={visuals}
       stats={stats}
       trackHealth={trackHealth}
       sprint={sprint ? { sprint, stats: sprintStats(sprint, db.tasks, now), tasks: summaries.filter((t) => t.sprintId === sprint.id) } : null}

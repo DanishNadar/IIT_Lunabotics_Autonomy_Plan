@@ -14,7 +14,7 @@ export function EditTaskDialog({ task, open, onOpenChange }: { task: Task; open:
   const [tab, setTab] = useState<"meta" | "spec">("meta");
   return (
     <Dialog open={open} onOpenChange={onOpenChange} title={`Edit ${task.key}`} description="Changes are audited. Leads may edit any field; specifications drive what members follow." wide>
-      <div className="mb-3 flex gap-1 rounded-md border border-line bg-panel-2 p-0.5 text-xs">
+      <div className="mb-3 flex gap-1 rounded-md border border-line bg-panel-2 p-0.5 text-[13px]">
         {(["meta", "spec"] as const).map((t) => (
           <button key={t} onClick={() => setTab(t)} className={`flex-1 rounded px-2 py-1 ${tab === t ? "bg-panel-3 text-fg" : "text-muted"}`}>
             {t === "meta" ? "Planning & ownership" : "Specification text"}
@@ -88,8 +88,8 @@ export function EditTaskDialog({ task, open, onOpenChange }: { task: Task; open:
               </Select>
             </Field>
             <Field label="Labels" hint="Comma separated."><Input name="labels" defaultValue={task.labels.join(", ")} /></Field>
-            <label className="flex items-center gap-2 text-xs text-fg-2"><input type="checkbox" name="independent" defaultChecked={task.requiresIndependentReview} /> Requires independent review (no self-approval)</label>
-            <label className="flex items-center gap-2 text-xs text-fg-2"><input type="checkbox" name="claimable" defaultChecked={task.claimable} /> Members may claim / request this task</label>
+            <label className="flex items-center gap-2 text-[13px] text-fg-2"><input type="checkbox" name="independent" defaultChecked={task.requiresIndependentReview} /> Requires independent review (no self-approval)</label>
+            <label className="flex items-center gap-2 text-[13px] text-fg-2"><input type="checkbox" name="claimable" defaultChecked={task.claimable} /> Members may claim / request this task</label>
           </div>
         ) : (
           <div className="space-y-3">

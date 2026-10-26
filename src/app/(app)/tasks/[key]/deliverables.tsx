@@ -29,7 +29,7 @@ export function DeliverablesSection({ data }: { data: TaskDetailData }) {
             <li key={d.id} className="rounded-md border border-line bg-panel-2 px-3 py-2">
               <div className="flex items-center gap-2">
                 {subs.length ? <CheckCircle2 className="size-4 text-ok" /> : <Circle className="size-4 text-faint" />}
-                <span className="flex-1 text-[13px] text-fg">{d.title}</span>
+                <span className="flex-1 text-[15px] text-fg">{d.title}</span>
                 <Badge>{KIND_LABEL[d.kind]}</Badge>
                 {!d.required && <Badge tone="neutral">optional</Badge>}
                 {canSubmit && <SubmitDialog taskId={data.task.id} deliverable={d} />}
@@ -37,7 +37,7 @@ export function DeliverablesSection({ data }: { data: TaskDetailData }) {
               {subs.length > 0 && (
                 <ul className="mt-1.5 space-y-0.5 pl-6">
                   {subs.map((s) => (
-                    <li key={s.id} className="flex flex-wrap items-center gap-2 text-[11px]">
+                    <li key={s.id} className="flex flex-wrap items-center gap-2 text-[13px]">
                       <a href={s.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 truncate text-info hover:underline"><ExternalLink className="size-3" />{s.url.replace(/^https?:\/\//, "").slice(0, 70)}</a>
                       <span className="text-muted">{member.get(s.memberId)?.name} · <Ago iso={s.createdAt} /></span>
                       {s.note && <span className="text-fg-2">— {s.note}</span>}
@@ -94,14 +94,14 @@ export function AcceptanceSection({ data }: { data: TaskDetailData }) {
               {a.verified && <ShieldCheck className="size-3" />}
             </button>
             <div className="min-w-0 flex-1">
-              <p className="text-[13px] text-fg">{a.text}</p>
+              <p className="text-[15px] text-fg">{a.text}</p>
               {a.target && (
-                <p className="mt-0.5 text-[11px]">
+                <p className="mt-0.5 text-[13px]">
                   <span className="text-info">Internal target: {a.target}</span>
                   {a.rationale && <span className="text-muted"> — {a.rationale}</span>}
                 </p>
               )}
-              {a.verified && a.verifiedBy && <p className="text-[10px] text-ok">Verified by {member.get(a.verifiedBy)?.name}</p>}
+              {a.verified && a.verifiedBy && <p className="text-xs text-ok">Verified by {member.get(a.verifiedBy)?.name}</p>}
             </div>
           </li>
         ))}

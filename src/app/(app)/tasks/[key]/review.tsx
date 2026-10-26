@@ -40,31 +40,31 @@ export function ReviewSection({ data }: { data: TaskDetailData }) {
     <Section id="review" letter="J" title="Review & Definition of Done" subtitle="A task cannot be approved until every item holds. Merged PRs alone never complete a task.">
       <div className="grid gap-4 lg:grid-cols-2">
         <div>
-          <h3 className="mb-1.5 text-[11px] font-semibold tracking-wider text-muted uppercase">Definition of Done</h3>
+          <h3 className="mb-1.5 text-[13px] font-semibold tracking-wider text-muted uppercase">Definition of Done</h3>
           <ul className="space-y-1">
             {dod.map((d) => (
-              <li key={d.key} className="flex items-start gap-2 text-xs">
+              <li key={d.key} className="flex items-start gap-2 text-[13px]">
                 {d.met ? <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-ok" /> : <Circle className="mt-0.5 size-3.5 shrink-0 text-faint" />}
                 <div>
                   <span className={d.met ? "text-fg" : "text-fg-2"}>{d.label}</span>
-                  <span className="block text-[11px] text-muted">{d.detail}</span>
+                  <span className="block text-[13px] text-muted">{d.detail}</span>
                 </div>
               </li>
             ))}
           </ul>
-          {task.requiresIndependentReview && <p className="mt-2 text-[11px] text-muted">Independent review required — assignees cannot approve this task.</p>}
+          {task.requiresIndependentReview && <p className="mt-2 text-[13px] text-muted">Independent review required — assignees cannot approve this task.</p>}
         </div>
         <div>
           {task.status !== "in_review" && task.status !== "completed" && canRequest && (
             <div className="space-y-2 rounded-md border border-line bg-panel-2 p-3">
-              <h3 className="flex items-center gap-1.5 text-xs font-semibold"><Send className="size-3.5" /> Request review</h3>
+              <h3 className="flex items-center gap-1.5 text-[13px] font-semibold"><Send className="size-3.5" /> Request review</h3>
               <Field label="Reviewer">
                 <Select value={reviewer} onChange={(e) => setReviewer(e.target.value)}>
                   <option value="">Any lead for this track</option>
                   {eligibleReviewers.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
                 </Select>
               </Field>
-              {!requestCheck.ok && <p className="text-[11px] text-warn">{requestCheck.reason}</p>}
+              {!requestCheck.ok && <p className="text-[13px] text-warn">{requestCheck.reason}</p>}
               <Button variant="primary" disabled={!requestCheck.ok || pending} onClick={() => run({ type: "review.request", taskId: task.id, reviewerId: reviewer || null })}>
                 Request review
               </Button>
@@ -74,14 +74,14 @@ export function ReviewSection({ data }: { data: TaskDetailData }) {
             canSubmitReview ? (
               <ReviewForm taskId={task.id} />
             ) : (
-              <div className="rounded-md border border-info/30 bg-info-soft p-3 text-xs">
+              <div className="rounded-md border border-info/30 bg-info-soft p-3 text-[13px]">
                 <p className="font-medium text-fg">Awaiting review{task.reviewerId ? ` by ${member.get(task.reviewerId)?.name}` : " by a track lead"}.</p>
                 {!reviewCheck.ok && can("task.review", { task, assignments }) && <p className="mt-1 text-warn">{reviewCheck.reason}</p>}
               </div>
             )
           )}
           {task.status === "completed" && (
-            <div className="rounded-md border border-ok/30 bg-ok-soft p-3 text-xs text-ok">
+            <div className="rounded-md border border-ok/30 bg-ok-soft p-3 text-[13px] text-ok">
               <ClipboardCheck className="mr-1 inline size-3.5" /> Approved and completed.
             </div>
           )}
@@ -89,22 +89,22 @@ export function ReviewSection({ data }: { data: TaskDetailData }) {
       </div>
       {data.reviews.length > 0 && (
         <div className="mt-4 border-t border-line pt-3">
-          <h3 className="mb-2 text-[11px] font-semibold tracking-wider text-muted uppercase">Review history</h3>
+          <h3 className="mb-2 text-[13px] font-semibold tracking-wider text-muted uppercase">Review history</h3>
           <div className="space-y-2">
             {data.reviews.map((r) => {
               const rv = member.get(r.reviewerId);
               return (
                 <div key={r.id} className="rounded-md border border-line bg-panel-2 p-3">
-                  <div className="mb-1.5 flex items-center gap-2 text-xs">
+                  <div className="mb-1.5 flex items-center gap-2 text-[13px]">
                     {rv && <Avatar name={rv.name} color={rv.avatarColor} size={18} />}
                     <span className="font-medium">{rv?.name}</span>
                     {r.decision === "approved" ? <Badge tone="ok"><CheckCircle2 /> Approved</Badge> : <Badge tone="warn"><XCircle /> Changes requested</Badge>}
-                    <span className="ml-auto text-[11px] text-muted"><Ago iso={r.createdAt} /></span>
+                    <span className="ml-auto text-[13px] text-muted"><Ago iso={r.createdAt} /></span>
                   </div>
                   <div className="mb-1.5 flex flex-wrap gap-1">
                     {REVIEW_DIMENSIONS.map((d) => <Badge key={d} tone={RATING_TONE[r.ratings[d]]}>{DIM_LABEL[d]}: {r.ratings[d]}</Badge>)}
                   </div>
-                  <p className="text-xs whitespace-pre-wrap text-fg-2">{r.summary}</p>
+                  <p className="text-[13px] whitespace-pre-wrap text-fg-2">{r.summary}</p>
                 </div>
               );
             })}
@@ -124,14 +124,14 @@ function ReviewForm({ taskId }: { taskId: string }) {
   const submit = (decision: "approved" | "changes_requested") => run({ type: "review.submit", taskId, decision, ratings: ratings as Record<ReviewDimension, ReviewRating>, summary });
   return (
     <div className="space-y-2 rounded-md border border-line bg-panel-2 p-3">
-      <h3 className="text-xs font-semibold">Structured review</h3>
+      <h3 className="text-[13px] font-semibold">Structured review</h3>
       <div className="space-y-1">
         {REVIEW_DIMENSIONS.map((d) => (
-          <div key={d} className="flex items-center gap-2 text-xs">
+          <div key={d} className="flex items-center gap-2 text-[13px]">
             <span className="w-40 shrink-0 text-fg-2">{DIM_LABEL[d]}</span>
             <div className="flex gap-0.5" role="radiogroup" aria-label={DIM_LABEL[d]}>
               {(["pass", "concern", "fail", "na"] as const).map((r) => (
-                <button key={r} role="radio" aria-checked={ratings[d] === r} onClick={() => setRatings({ ...ratings, [d]: r })} className={cn("rounded border px-1.5 py-0.5 text-[10px] uppercase", ratings[d] === r ? { pass: "border-ok bg-ok-soft text-ok", concern: "border-warn bg-warn-soft text-warn", fail: "border-danger bg-danger-soft text-danger", na: "border-line-strong bg-panel-3 text-fg" }[r] : "border-line text-muted hover:text-fg")}>
+                <button key={r} role="radio" aria-checked={ratings[d] === r} onClick={() => setRatings({ ...ratings, [d]: r })} className={cn("rounded border px-1.5 py-0.5 text-xs uppercase", ratings[d] === r ? { pass: "border-ok bg-ok-soft text-ok", concern: "border-warn bg-warn-soft text-warn", fail: "border-danger bg-danger-soft text-danger", na: "border-line-strong bg-panel-3 text-fg" }[r] : "border-line text-muted hover:text-fg")}>
                   {r}
                 </button>
               ))}
@@ -144,7 +144,7 @@ function ReviewForm({ taskId }: { taskId: string }) {
         <Button variant="primary" disabled={!complete || hasFail || summary.length < 5 || pending} onClick={() => submit("approved")}><CheckCircle2 /> Approve & complete</Button>
         <Button variant="danger" disabled={!complete || summary.length < 5 || pending} onClick={() => submit("changes_requested")}><XCircle /> Request changes</Button>
       </div>
-      {hasFail && <p className="text-[11px] text-warn">A failing dimension means changes must be requested.</p>}
+      {hasFail && <p className="text-[13px] text-warn">A failing dimension means changes must be requested.</p>}
     </div>
   );
 }

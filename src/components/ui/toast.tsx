@@ -26,7 +26,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, x: 20 }}
               role={t.kind === "error" ? "alert" : "status"}
-              className="pointer-events-auto flex items-start gap-2 rounded-md border border-line-strong bg-panel-2 px-3 py-2 text-xs text-fg shadow-[var(--shadow)]"
+              className="pointer-events-auto flex items-start gap-2 rounded-md border border-line-strong bg-panel-2 px-3 py-2 text-[13px] text-fg shadow-[var(--shadow)]"
             >
               {t.kind === "ok" ? <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-ok" /> : <AlertTriangle className="mt-0.5 size-3.5 shrink-0 text-warn" />}
               <span className="flex-1">{t.text}</span>

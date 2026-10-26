@@ -37,8 +37,8 @@ function CompNode({ data }: NodeProps<Node<{ c: IntegrationComponent; color: str
     <div className={cn("w-[170px] rounded-md border px-2.5 py-1.5", c.ownerTeam !== "Autonomy" ? "border-dashed bg-bg opacity-80" : "bg-panel-2", selected ? "border-info ring-1 ring-info" : "border-line-strong")} style={c.ownerTeam !== "Autonomy" ? undefined : { borderTop: `3px solid ${color}` }}>
       {c.ownerTeam !== "Autonomy" && <div className="text-[8px] font-semibold tracking-wider text-faint uppercase">{c.ownerTeam} · interface only</div>}
       <Handle type="target" position={Position.Left} className="!size-1.5 !border-0 !bg-line-strong" />
-      <div className="text-[11px] font-semibold text-fg">{c.name}</div>
-      <div className="mt-0.5 flex items-center gap-1 text-[9px] text-muted">
+      <div className="text-[13px] font-semibold text-fg">{c.name}</div>
+      <div className="mt-0.5 flex items-center gap-1 text-[11px] text-muted">
         <span className={cn("size-1.5 rounded-full", impl === "tested" ? "bg-ok" : impl === "implemented" ? "bg-info" : impl === "in progress" ? "bg-violet" : "bg-line-strong")} />
         {c.ownerTeam === "Autonomy" ? impl : "external"}
         <span className="ml-auto">{c.interfaceStatus}</span>
@@ -86,8 +86,8 @@ export function ArchitectureClient({ components, tasks }: { components: Integrat
       <div className="flex flex-wrap items-center gap-3 border-b border-line px-4 py-2">
         <h1 className="text-[15px] font-semibold">ROS 2 architecture explorer</h1>
         <Badge tone="warn" title="Interfaces are proposed until committed code matches them">All interfaces currently illustrative</Badge>
-        <span className="text-[11px] text-muted">Dashed nodes are owned by other teams.</span>
-        <div className="ml-auto flex flex-wrap gap-2 text-[10px]">
+        <span className="text-[13px] text-muted">Dashed nodes are owned by other teams.</span>
+        <div className="ml-auto flex flex-wrap gap-2 text-xs">
           {GROUPS.map((g) => <span key={g.id} className="flex items-center gap-1 text-muted"><span className="size-2 rounded-sm" style={{ background: g.color }} />{g.label}</span>)}
         </div>
       </div>
@@ -99,11 +99,11 @@ export function ArchitectureClient({ components, tasks }: { components: Integrat
           </ReactFlow>
         </div>
         {c && (
-          <aside className="w-[360px] shrink-0 overflow-y-auto border-l border-line bg-panel p-4 text-xs" aria-label="Component inspector">
+          <aside className="w-[360px] shrink-0 overflow-y-auto border-l border-line bg-panel p-4 text-[13px]" aria-label="Component inspector">
             <div className="flex items-start gap-2">
               <div className="min-w-0 flex-1">
-                <div className="text-[10px] font-semibold tracking-wider uppercase" style={{ color: GROUPS.find((g) => g.id === c.group)?.color }}>{GROUPS.find((g) => g.id === c.group)?.label}</div>
-                <h2 className="text-sm font-semibold">{c.name}</h2>
+                <div className="text-xs font-semibold tracking-wider uppercase" style={{ color: GROUPS.find((g) => g.id === c.group)?.color }}>{GROUPS.find((g) => g.id === c.group)?.label}</div>
+                <h2 className="text-[15px] font-semibold">{c.name}</h2>
               </div>
               <button onClick={() => setSel(null)} className="text-muted hover:text-fg" aria-label="Close inspector"><X className="size-4" /></button>
             </div>
@@ -118,16 +118,16 @@ export function ArchitectureClient({ components, tasks }: { components: Integrat
             <Topics title="Outputs" icon={<ArrowUpFromLine className="size-3.5" />} list={c.outputs} />
             {c.parameters.length > 0 && (
               <div className="mt-3">
-                <h3 className="mb-1 flex items-center gap-1 text-[11px] font-semibold tracking-wider text-muted uppercase"><SlidersHorizontal className="size-3.5" /> Parameters</h3>
-                <div className="flex flex-wrap gap-1">{c.parameters.map((p) => <code key={p} className="rounded bg-panel-3 px-1 font-mono text-[10px]">{p}</code>)}</div>
+                <h3 className="mb-1 flex items-center gap-1 text-[13px] font-semibold tracking-wider text-muted uppercase"><SlidersHorizontal className="size-3.5" /> Parameters</h3>
+                <div className="flex flex-wrap gap-1">{c.parameters.map((p) => <code key={p} className="rounded bg-panel-3 px-1 font-mono text-xs">{p}</code>)}</div>
               </div>
             )}
             <div className="mt-3">
-              <h3 className="mb-1 text-[11px] font-semibold tracking-wider text-muted uppercase">Engineering tasks</h3>
+              <h3 className="mb-1 text-[13px] font-semibold tracking-wider text-muted uppercase">Engineering tasks</h3>
               <ul className="space-y-1">{ct.map((t) => <li key={t.id} className="flex items-center gap-2"><TaskLink k={t.key} title={t.title} className="min-w-0 flex-1" /><StatusBadge status={t.status} /></li>)}</ul>
             </div>
             <div className="mt-3 text-muted">{c.ownerTeam === "Autonomy" ? <>Owner: <span className="text-fg">{owner?.name ?? "unassigned"}</span></> : <>Implemented by the <span className="text-fg">{c.ownerTeam}</span> team; autonomy owns only the interface (see AG-07).</>}</div>
-            <p className="mt-4 text-[10px] text-faint">Implementation and test status derive from the linked tasks&apos; review-approved state. Topic names follow proposed conventions pending AG-04.</p>
+            <p className="mt-4 text-xs text-faint">Implementation and test status derive from the linked tasks&apos; review-approved state. Topic names follow proposed conventions pending AG-04.</p>
           </aside>
         )}
       </div>
@@ -138,9 +138,9 @@ export function ArchitectureClient({ components, tasks }: { components: Integrat
 function Topics({ title, icon, list }: { title: string; icon: React.ReactNode; list: IntegrationComponent["inputs"] }) {
   return (
     <div className="mt-3">
-      <h3 className="mb-1 flex items-center gap-1 text-[11px] font-semibold tracking-wider text-muted uppercase">{icon} {title}</h3>
+      <h3 className="mb-1 flex items-center gap-1 text-[13px] font-semibold tracking-wider text-muted uppercase">{icon} {title}</h3>
       {list.length === 0 ? <p className="text-faint">—</p> : (
-        <table className="w-full text-[11px]"><tbody>{list.map((t) => <tr key={t.name} className="border-b border-line last:border-0"><td className="py-1 pr-2 font-mono text-fg">{t.name}</td><td className="py-1 font-mono text-info">{t.type}</td></tr>)}</tbody></table>
+        <table className="w-full text-[13px]"><tbody>{list.map((t) => <tr key={t.name} className="border-b border-line last:border-0"><td className="py-1 pr-2 font-mono text-fg">{t.name}</td><td className="py-1 font-mono text-info">{t.type}</td></tr>)}</tbody></table>
       )}
     </div>
   );

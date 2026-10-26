@@ -38,9 +38,9 @@ export function DocClient({ doc, revisions }: { doc: Document; revisions: Docume
     <div className="mx-auto max-w-[1400px] space-y-4 p-4">
       <div className="flex flex-wrap items-center gap-3">
         <div className="min-w-0 flex-1">
-          <Link href="/docs" className="text-[11px] text-muted hover:text-fg">Knowledge base /</Link>
+          <Link href="/docs" className="text-[13px] text-muted hover:text-fg">Knowledge base /</Link>
           {editing ? <Input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1 text-lg font-semibold" aria-label="Title" /> : <h1 className="text-xl font-semibold">{doc.title}</h1>}
-          <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] text-muted">
+          <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[13px] text-muted">
             <Badge>{doc.category}</Badge>
             {doc.status !== "published" && <Badge tone="warn">{doc.status.replace("_", " ")}</Badge>}
             {doc.tags.map((t) => <span key={t}>#{t}</span>)}
@@ -61,7 +61,7 @@ export function DocClient({ doc, revisions }: { doc: Document; revisions: Docume
           {doc.adr && !editing && (
             <Panel>
               <PanelHeader title="Architecture decision record" actions={<Badge tone={doc.adr.status === "accepted" ? "ok" : doc.adr.status === "open" ? "warn" : "info"}>{doc.adr.status}</Badge>} />
-              <div className="space-y-3 p-4 text-xs">
+              <div className="space-y-3 p-4 text-[13px]">
                 <div><h3 className="mb-0.5 font-semibold text-muted uppercase">Context</h3><p className="text-fg-2">{doc.adr.context}</p></div>
                 <div>
                   <h3 className="mb-1 font-semibold text-muted uppercase">Alternatives</h3>
@@ -76,7 +76,7 @@ export function DocClient({ doc, revisions }: { doc: Document; revisions: Docume
             </Panel>
           )}
           {viewRev && !editing && (
-            <div className="flex items-center gap-2 rounded-md border border-warn/30 bg-warn-soft px-3 py-2 text-xs text-warn">
+            <div className="flex items-center gap-2 rounded-md border border-warn/30 bg-warn-soft px-3 py-2 text-[13px] text-warn">
               Viewing revision from <Ago iso={viewRev.createdAt} /> ({viewRev.summary}).
               <button className="underline" onClick={() => setViewRev(null)}>Back to current</button>
               {can("doc.edit") && <Button size="xs" className="ml-auto" onClick={() => run({ type: "doc.restore", revisionId: viewRev.id }, { onSuccess: () => setViewRev(null) })}><RotateCcw /> Restore this revision</Button>}
@@ -89,15 +89,15 @@ export function DocClient({ doc, revisions }: { doc: Document; revisions: Docume
                   {[[<Bold key="b" />, () => wrap("**"), "Bold"], [<Italic key="i" />, () => wrap("_"), "Italic"], [<Heading2 key="h" />, () => wrap("\n## ", "", "Heading"), "Heading"], [<List key="l" />, () => wrap("\n- ", "", "item"), "List"], [<Code key="c" />, () => wrap("\n```bash\n", "\n```\n", "command"), "Code block"], [<Link2 key="k" />, () => wrap("[", "](https://)", "link"), "Link"], [<Table key="t" />, () => wrap("\n| Column | Column |\n|---|---|\n| ", " | |\n", "value"), "Table"]].map(([icon, fn, label]) => (
                     <button key={label as string} type="button" onClick={fn as () => void} className="rounded p-1.5 text-muted hover:bg-panel-3 hover:text-fg [&_svg]:size-3.5" title={label as string} aria-label={label as string}>{icon as React.ReactNode}</button>
                   ))}
-                  <button type="button" onClick={() => setSplit(!split)} className={cn("ml-auto flex items-center gap-1 rounded px-2 py-1 text-[11px]", split ? "bg-panel-3 text-fg" : "text-muted")}><Eye className="size-3" /> Live preview</button>
+                  <button type="button" onClick={() => setSplit(!split)} className={cn("ml-auto flex items-center gap-1 rounded px-2 py-1 text-[13px]", split ? "bg-panel-3 text-fg" : "text-muted")}><Eye className="size-3" /> Live preview</button>
                 </div>
                 <div className={cn("grid gap-3", split && "lg:grid-cols-2")}>
-                  <textarea ref={ta} value={body} onChange={(e) => setBody(e.target.value)} className="min-h-[60vh] w-full resize-y rounded-md border border-line bg-panel-2 p-3 font-mono text-xs leading-relaxed text-fg focus:border-info/60 focus:outline-none" aria-label="Document body (Markdown)" />
+                  <textarea ref={ta} value={body} onChange={(e) => setBody(e.target.value)} className="min-h-[60vh] w-full resize-y rounded-md border border-line bg-panel-2 p-3 font-mono text-[13px] leading-relaxed text-fg focus:border-info/60 focus:outline-none" aria-label="Document body (Markdown)" />
                   {split && <div className="max-h-[70vh] overflow-y-auto rounded-md border border-line p-3"><Markdown>{body}</Markdown></div>}
                 </div>
                 <div className="grid gap-2 sm:grid-cols-2">
-                  <Input value={tags} onChange={(e) => setTags(e.target.value)} placeholder="tags, comma separated" className="text-xs" aria-label="Tags" />
-                  <Input value={summary} onChange={(e) => setSummary(e.target.value)} placeholder="Revision summary (what changed?)" className="text-xs" aria-label="Revision summary" />
+                  <Input value={tags} onChange={(e) => setTags(e.target.value)} placeholder="tags, comma separated" className="text-[13px]" aria-label="Tags" />
+                  <Input value={summary} onChange={(e) => setSummary(e.target.value)} placeholder="Revision summary (what changed?)" className="text-[13px]" aria-label="Revision summary" />
                 </div>
               </div>
             ) : (
@@ -110,9 +110,9 @@ export function DocClient({ doc, revisions }: { doc: Document; revisions: Docume
           <ul className="max-h-[60vh] divide-y divide-line overflow-y-auto">
             {revisions.map((r, i) => (
               <li key={r.id}>
-                <button onClick={() => setViewRev(i === 0 ? null : r)} className={cn("block w-full px-3 py-2 text-left text-xs hover:bg-panel-2", viewRev?.id === r.id && "bg-panel-3")}>
-                  <div className="text-fg">{r.summary}{i === 0 && <span className="ml-1 text-[10px] text-ok">current</span>}</div>
-                  <div className="text-[10px] text-muted">{r.authorId ? member.get(r.authorId)?.name : "Seed"} · <Ago iso={r.createdAt} /></div>
+                <button onClick={() => setViewRev(i === 0 ? null : r)} className={cn("block w-full px-3 py-2 text-left text-[13px] hover:bg-panel-2", viewRev?.id === r.id && "bg-panel-3")}>
+                  <div className="text-fg">{r.summary}{i === 0 && <span className="ml-1 text-xs text-ok">current</span>}</div>
+                  <div className="text-xs text-muted">{r.authorId ? member.get(r.authorId)?.name : "Seed"} · <Ago iso={r.createdAt} /></div>
                 </button>
               </li>
             ))}

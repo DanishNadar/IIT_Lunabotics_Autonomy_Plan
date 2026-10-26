@@ -37,9 +37,9 @@ export function TaskHeader({ data }: { data: TaskDetailData }) {
   const canClaim = can("task.claim", ctx) && !isAssignee && !myClaim;
 
   return (
-    <section aria-label="Task summary" className="sticky top-11 z-20 border-b border-line bg-bg/95 backdrop-blur">
-      <div className="mx-auto max-w-[1500px] px-4 py-3">
-        <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted">
+    <section aria-label="Task summary" className="border-b border-line bg-panel/40">
+      <div className="mx-auto max-w-[1500px] px-4 py-6 sm:px-8">
+        <div className="flex flex-wrap items-center gap-2 text-[13px] text-muted">
           <Link href="/board" className="hover:text-fg">All Tasks</Link>
           <span>/</span>
           <Link href={`/tracks/${task.trackId}`} className="hover:text-fg">{track.get(task.trackId)?.emoji} {track.get(task.trackId)?.name}</Link>
@@ -52,18 +52,18 @@ export function TaskHeader({ data }: { data: TaskDetailData }) {
           {task.backlog === "advanced" && !task.archived && <Badge tone="violet">Advanced backlog</Badge>}
           {task.legacyKeys.length > 0 && <Badge title="Old links redirect here">formerly {task.legacyKeys.join(", ")}</Badge>}
         </div>
-        <div className="mt-1 flex flex-wrap items-start gap-3">
+        <div className="mt-3 flex flex-wrap items-start gap-4">
           <div className="min-w-0 flex-1">
-            <h1 className="flex flex-wrap items-baseline gap-2 text-lg leading-tight font-semibold text-fg">
-              <span className="font-mono text-[15px] text-muted">{task.key}</span>
+            <h1 className="flex flex-wrap items-baseline gap-3 text-3xl leading-tight font-bold text-fg">
+              <span className="font-mono text-xl text-muted">{task.key}</span>
               {task.title}
             </h1>
-            <div className="mt-1.5 flex flex-wrap items-center gap-2">
+            <div className="mt-3 flex flex-wrap items-center gap-2">
               <DiscordBadge trackId={task.trackId} />
               {task.archived ? <ArchivedBadge externalTeam={task.externalTeam} /> : <StatusBadge status={task.status} />}
               <PriorityBadge priority={task.priority} />
               <DifficultyMeter difficulty={task.difficulty} label />
-              <span className="inline-flex items-center gap-1 text-[11px] text-muted"><Clock className="size-3" />{task.estimateHours}h est.</span>
+              <span className="inline-flex items-center gap-1 text-[13px] text-muted"><Clock className="size-3" />{task.estimateHours}h est.</span>
               {task.sprintId && <Badge>{sprint.get(task.sprintId)?.name.split("—")[0].trim()}</Badge>}
               {task.milestoneId && <Badge tone="neutral">{milestone.get(task.milestoneId)?.name.split("·")[0].trim()}</Badge>}
               {summary.missingDeps.length > 0 && <Badge tone="warn">Waiting on {summary.missingDeps.join(", ")}</Badge>}
@@ -73,7 +73,7 @@ export function TaskHeader({ data }: { data: TaskDetailData }) {
           <div className="flex w-full items-center gap-2 sm:w-auto">
             <div className="flex w-40 items-center gap-2">
               <Progress value={summary.progress.pct} tone={summary.progress.pct === 100 ? "ok" : "info"} label="Completion" />
-              <span className="font-mono text-[11px] text-muted">{summary.progress.pct}%</span>
+              <span className="font-mono text-[13px] text-muted">{summary.progress.pct}%</span>
             </div>
             <Button onClick={() => setDiscordOpen(true)} title="Copy a summary formatted for Discord">
               <MessageSquareShare /> <span className="hidden md:inline">Copy for Discord</span>
@@ -176,9 +176,9 @@ function DiscordDialog({ data, onClose }: { data: TaskDetailData; onClose: () =>
   const text = discordSummary(data.task, t, data.deliverables, data.acceptance, `${window.location.origin}/tasks/${data.task.key}`);
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()} title={`Share ${data.task.key} on Discord`} description={`Paste into ${t.emoji} ${t.discordChannel}. Nothing is posted automatically.`} wide>
-      <Textarea readOnly value={text} className="min-h-[320px] font-mono text-xs" aria-label="Discord summary" onFocus={(e) => e.currentTarget.select()} />
+      <Textarea readOnly value={text} className="min-h-[320px] font-mono text-[13px]" aria-label="Discord summary" onFocus={(e) => e.currentTarget.select()} />
       <div className="mt-3 flex items-center justify-between gap-2">
-        <span className="text-[11px] text-muted">{text.length}/2000 characters</span>
+        <span className="text-[13px] text-muted">{text.length}/2000 characters</span>
         <Button
           variant="primary"
           onClick={() => {

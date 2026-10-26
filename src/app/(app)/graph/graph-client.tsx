@@ -21,11 +21,11 @@ function TaskNode({ data }: NodeProps<Node<TaskNodeData>>) {
     <div className={cn("w-[190px] rounded-md border bg-panel-2 px-2 py-1.5 text-left shadow-sm transition-opacity", t.status === "blocked" ? "border-danger" : critical ? "border-warn" : "border-line-strong", dim && "opacity-25")} style={{ borderLeft: `3px solid ${color}` }}>
       <Handle type="target" position={Position.Left} className="!size-2 !border-0 !bg-line-strong" />
       <div className="flex items-center gap-1.5">
-        <span className="font-mono text-[10px] font-semibold" style={{ color }}>{t.key}</span>
+        <span className="font-mono text-xs font-semibold" style={{ color }}>{t.key}</span>
         <span className={cn("ml-auto size-1.5 rounded-full", STATUS_DOT[t.status])} title={STATUS_LABEL[t.status]} />
       </div>
-      <div className="line-clamp-2 text-[11px] leading-tight text-fg">{t.title}</div>
-      <div className="mt-0.5 flex items-center gap-1.5 text-[9px] text-muted">
+      <div className="line-clamp-2 text-[13px] leading-tight text-fg">{t.title}</div>
+      <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-muted">
         <span>{STATUS_LABEL[t.status]}</span>
         {t.missingDeps.length > 0 && <span className="text-warn">· waits {t.missingDeps.length}</span>}
         {critical && <span className="text-warn">· integration point</span>}
@@ -38,12 +38,12 @@ function TaskNode({ data }: NodeProps<Node<TaskNodeData>>) {
 function SystemNode({ data }: NodeProps<Node<{ label: string; sub: string; tone: string; tasks: string; external?: boolean }>>) {
   return (
     <div className={cn("w-[180px] rounded-md border px-3 py-2 text-center", data.external ? "border-dashed border-faint bg-bg text-muted" : "border-line-strong bg-panel-2")} style={data.external ? undefined : { borderTop: `3px solid ${data.tone}` }}>
-      {data.external && <div className="mb-0.5 text-[9px] font-semibold tracking-wider text-faint uppercase">External team</div>}
+      {data.external && <div className="mb-0.5 text-[11px] font-semibold tracking-wider text-faint uppercase">External team</div>}
       <Handle type="target" position={Position.Left} className="!opacity-0" />
       <Handle type="target" position={Position.Top} id="t" className="!opacity-0" />
-      <div className="text-[12px] font-semibold text-fg">{data.label}</div>
-      <div className="text-[10px] text-muted">{data.sub}</div>
-      {data.tasks && <div className="mt-1 font-mono text-[9px] text-faint">{data.tasks}</div>}
+      <div className="text-sm font-semibold text-fg">{data.label}</div>
+      <div className="text-xs text-muted">{data.sub}</div>
+      {data.tasks && <div className="mt-1 font-mono text-[11px] text-faint">{data.tasks}</div>}
       <Handle type="source" position={Position.Right} className="!opacity-0" />
       <Handle type="source" position={Position.Bottom} id="b" className="!opacity-0" />
     </div>
@@ -135,20 +135,20 @@ export function GraphClient({ tasks, deps }: { tasks: TaskSummary[]; deps: TaskD
     <div className="flex h-[calc(100vh-44px)] flex-col">
       <div className="flex flex-wrap items-center gap-2 border-b border-line px-4 py-2">
         <h1 className="mr-2 text-[15px] font-semibold">Dependency graph</h1>
-        <div className="flex rounded-md border border-line bg-panel p-0.5 text-xs">
+        <div className="flex rounded-md border border-line bg-panel p-0.5 text-[13px]">
           {(["tasks", "system"] as const).map((m) => <button key={m} onClick={() => setMode(m)} className={cn("rounded px-2 py-0.5", mode === m ? "bg-panel-3 text-fg" : "text-muted")}>{m === "tasks" ? "Task dependencies" : "Subsystem flow"}</button>)}
         </div>
         {mode === "tasks" && (
           <>
-            <div className="flex rounded-md border border-line bg-panel p-0.5 text-xs">
+            <div className="flex rounded-md border border-line bg-panel p-0.5 text-[13px]">
               {(["initial", "all"] as const).map((s) => <button key={s} onClick={() => setScope(s)} className={cn("rounded px-2 py-0.5", scope === s ? "bg-panel-3 text-fg" : "text-muted")}>{s === "initial" ? "Initial tasks" : "Include advanced"}</button>)}
             </div>
             <div className="flex flex-wrap gap-1">
-              {tracks.map((t) => <button key={t.id} onClick={() => setFocusTrack(focusTrack === t.id ? null : t.id)} className={cn("rounded border px-1.5 py-0.5 font-mono text-[10px]", focusTrack === t.id ? "border-current" : "border-line")} style={{ color: t.color }}>{t.id}</button>)}
+              {tracks.map((t) => <button key={t.id} onClick={() => setFocusTrack(focusTrack === t.id ? null : t.id)} className={cn("rounded border px-1.5 py-0.5 font-mono text-xs", focusTrack === t.id ? "border-current" : "border-line")} style={{ color: t.color }}>{t.id}</button>)}
             </div>
           </>
         )}
-        <div className="ml-auto flex flex-wrap items-center gap-2 text-[10px] text-muted">
+        <div className="ml-auto flex flex-wrap items-center gap-2 text-xs text-muted">
           {mode === "tasks" ? (
             <>
               <span className="flex items-center gap-1"><span className="h-0.5 w-5 bg-warn" /> hard prerequisite</span>

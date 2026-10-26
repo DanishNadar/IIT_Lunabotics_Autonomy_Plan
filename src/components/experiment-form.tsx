@@ -56,30 +56,30 @@ export function ExperimentForm({ experiment, metrics, tasks, onDone }: { experim
       <Field label="Dataset / bag / scenario"><Input name="dataset" defaultValue={experiment?.dataset} /></Field>
       <Field label="Status"><Select name="status" defaultValue={experiment?.status ?? "planned"}><option value="planned">Planned</option><option value="running">Running</option><option value="complete">Complete</option><option value="invalid">Invalid</option></Select></Field>
       <div className="md:col-span-2">
-        <div className="mb-1 text-[11px] font-medium text-muted uppercase">Parameters</div>
+        <div className="mb-1 text-[13px] font-medium text-muted uppercase">Parameters</div>
         {params.map((p, i) => (
           <div key={i} className="mb-1 flex gap-2">
-            <Input value={p.k} onChange={(e) => setParams(params.map((x, j) => (j === i ? { ...x, k: e.target.value } : x)))} placeholder="name" className="h-7 text-xs" />
-            <Input value={p.v} onChange={(e) => setParams(params.map((x, j) => (j === i ? { ...x, v: e.target.value } : x)))} placeholder="value" className="h-7 text-xs" />
+            <Input value={p.k} onChange={(e) => setParams(params.map((x, j) => (j === i ? { ...x, k: e.target.value } : x)))} placeholder="name" className="h-7 text-[13px]" />
+            <Input value={p.v} onChange={(e) => setParams(params.map((x, j) => (j === i ? { ...x, v: e.target.value } : x)))} placeholder="value" className="h-7 text-[13px]" />
             <Button size="icon" variant="ghost" onClick={() => setParams(params.filter((_, j) => j !== i))} aria-label="Remove parameter"><Trash2 /></Button>
           </div>
         ))}
         <Button size="xs" variant="ghost" onClick={() => setParams([...params, { k: "", v: "" }])}><Plus /> Parameter</Button>
       </div>
       <div className="md:col-span-2">
-        <div className="mb-1 text-[11px] font-medium text-muted uppercase">Measured metrics — record only values you measured</div>
+        <div className="mb-1 text-[13px] font-medium text-muted uppercase">Measured metrics — record only values you measured</div>
         {vals.map((v, i) => {
           const def = metrics.find((m) => m.key === v.metricKey);
           return (
             <div key={i} className="mb-1 flex flex-wrap gap-2">
-              <Select value={v.metricKey} onChange={(e) => setVals(vals.map((x, j) => (j === i ? { ...x, metricKey: e.target.value } : x)))} className="h-7 w-64 text-xs" aria-label="Metric">
+              <Select value={v.metricKey} onChange={(e) => setVals(vals.map((x, j) => (j === i ? { ...x, metricKey: e.target.value } : x)))} className="h-7 w-64 text-[13px]" aria-label="Metric">
                 <option value="">Select metric…</option>
                 {metrics.map((m) => <option key={m.key} value={m.key}>{m.domain} · {m.name} ({m.unit})</option>)}
               </Select>
-              <Input value={v.value} onChange={(e) => setVals(vals.map((x, j) => (j === i ? { ...x, value: e.target.value } : x)))} type="number" step="any" placeholder={def?.unit ?? "value"} className="h-7 w-28 text-xs" aria-label="Value" />
-              <Input value={v.note} onChange={(e) => setVals(vals.map((x, j) => (j === i ? { ...x, note: e.target.value } : x)))} placeholder="note" className="h-7 flex-1 text-xs" />
+              <Input value={v.value} onChange={(e) => setVals(vals.map((x, j) => (j === i ? { ...x, value: e.target.value } : x)))} type="number" step="any" placeholder={def?.unit ?? "value"} className="h-7 w-28 text-[13px]" aria-label="Value" />
+              <Input value={v.note} onChange={(e) => setVals(vals.map((x, j) => (j === i ? { ...x, note: e.target.value } : x)))} placeholder="note" className="h-7 flex-1 text-[13px]" />
               <Button size="icon" variant="ghost" onClick={() => setVals(vals.filter((_, j) => j !== i))} aria-label="Remove metric"><Trash2 /></Button>
-              {def && <p className="w-full text-[10px] text-faint">{def.definition} Provenance: {def.provenance}</p>}
+              {def && <p className="w-full text-xs text-faint">{def.definition} Provenance: {def.provenance}</p>}
             </div>
           );
         })}
@@ -89,11 +89,11 @@ export function ExperimentForm({ experiment, metrics, tasks, onDone }: { experim
       <Field label="Notes"><Textarea name="notes" defaultValue={experiment?.notes} /></Field>
       <Field label="Conclusions"><Textarea name="conclusions" defaultValue={experiment?.conclusions} /></Field>
       <div className="md:col-span-2">
-        <div className="mb-1 text-[11px] font-medium text-muted uppercase">Artifacts (screenshots, bags, reports)</div>
+        <div className="mb-1 text-[13px] font-medium text-muted uppercase">Artifacts (screenshots, bags, reports)</div>
         {artifacts.map((a, i) => (
           <div key={i} className="mb-1 flex gap-2">
-            <Input value={a.label} onChange={(e) => setArtifacts(artifacts.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))} placeholder="label" className="h-7 w-48 text-xs" />
-            <Input value={a.url} onChange={(e) => setArtifacts(artifacts.map((x, j) => (j === i ? { ...x, url: e.target.value } : x)))} placeholder="https://" type="url" className="h-7 flex-1 text-xs" />
+            <Input value={a.label} onChange={(e) => setArtifacts(artifacts.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))} placeholder="label" className="h-7 w-48 text-[13px]" />
+            <Input value={a.url} onChange={(e) => setArtifacts(artifacts.map((x, j) => (j === i ? { ...x, url: e.target.value } : x)))} placeholder="https://" type="url" className="h-7 flex-1 text-[13px]" />
             <Button size="icon" variant="ghost" onClick={() => setArtifacts(artifacts.filter((_, j) => j !== i))} aria-label="Remove artifact"><Trash2 /></Button>
           </div>
         ))}

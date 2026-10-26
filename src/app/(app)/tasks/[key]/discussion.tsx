@@ -28,7 +28,7 @@ export function DiscussionSection({ data }: { data: TaskDetailData }) {
   return (
     <Section id="discussion" letter="K" title="Discussion" subtitle="Markdown, code blocks and @mentions (e.g. @first.last or a GitHub username) are supported">
       {data.blockers.length > 0 && <BlockerList data={data} />}
-      {roots.length === 0 && openBlockers.length === 0 && <p className="mb-3 text-xs text-muted">No discussion yet. Ask questions here so answers stay with the work.</p>}
+      {roots.length === 0 && openBlockers.length === 0 && <p className="mb-3 text-[13px] text-muted">No discussion yet. Ask questions here so answers stay with the work.</p>}
       <div className="space-y-3">
         {roots.map((c) => (
           <Thread key={c.id} comment={c} all={data.comments} taskId={data.task.id} canComment={canComment} />
@@ -53,21 +53,21 @@ function BlockerList({ data }: { data: TaskDetailData }) {
   return (
     <div className="mb-4 space-y-1.5">
       {data.blockers.map((b) => (
-        <div key={b.id} className={cn("rounded-md border px-3 py-2 text-xs", b.resolvedAt ? "border-line bg-panel-2 text-muted" : "border-danger/30 bg-danger-soft")}>
+        <div key={b.id} className={cn("rounded-md border px-3 py-2 text-[13px]", b.resolvedAt ? "border-line bg-panel-2 text-muted" : "border-danger/30 bg-danger-soft")}>
           <div className="flex items-start gap-2">
             {b.resolvedAt ? <CheckCircle2 className="mt-0.5 size-3.5 text-ok" /> : <AlertOctagon className="mt-0.5 size-3.5 text-danger" />}
             <div className="flex-1">
               <p className={b.resolvedAt ? "line-through" : "text-fg"}>{b.description}</p>
-              <p className="text-[11px] text-muted">
+              <p className="text-[13px] text-muted">
                 Raised by {member.get(b.raisedBy)?.name} · <Ago iso={b.createdAt} />
-                {b.resolvedAt && ` · resolved $<Ago iso={b.resolvedAt} />${b.resolution ? ` — ${b.resolution}` : ""}`}
+                {b.resolvedAt && <> · resolved <Ago iso={b.resolvedAt} />{b.resolution ? ` — ${b.resolution}` : ""}</>}
               </p>
             </div>
             {!b.resolvedAt && canResolve && resolving !== b.id && <Button size="xs" onClick={() => setResolving(b.id)}>Resolve</Button>}
           </div>
           {resolving === b.id && (
             <form className="mt-2 flex gap-2" onSubmit={(e) => { e.preventDefault(); void run({ type: "blocker.resolve", blockerId: b.id, resolution }, { onSuccess: () => { setResolving(null); setResolution(""); } }); }}>
-              <input value={resolution} onChange={(e) => setResolution(e.target.value)} placeholder="How was it resolved?" className="h-7 flex-1 rounded border border-line bg-panel px-2 text-xs" />
+              <input value={resolution} onChange={(e) => setResolution(e.target.value)} placeholder="How was it resolved?" className="h-7 flex-1 rounded border border-line bg-panel px-2 text-[13px]" />
               <Button type="submit" size="sm" variant="primary">Resolve</Button>
             </form>
           )}
@@ -81,12 +81,12 @@ function Thread({ comment, all, taskId, canComment }: { comment: TaskComment; al
   const replies = all.filter((c) => c.parentId === comment.id);
   const [replying, setReplying] = useState(false);
   return (
-    <div id={`comment-${comment.id}`} className="scroll-mt-36 rounded-md border border-line bg-panel-2">
+    <div id={`comment-${comment.id}`} className="scroll-mt-28 rounded-md border border-line bg-panel-2">
       <CommentBody c={comment} />
       {replies.length > 0 && (
         <div className="space-y-0 border-t border-line pl-6">
           {replies.map((r) => (
-            <div key={r.id} id={`comment-${r.id}`} className="scroll-mt-36 border-b border-line last:border-0">
+            <div key={r.id} id={`comment-${r.id}`} className="scroll-mt-28 border-b border-line last:border-0">
               <CommentBody c={r} />
             </div>
           ))}
@@ -95,7 +95,7 @@ function Thread({ comment, all, taskId, canComment }: { comment: TaskComment; al
       {canComment && (
         <div className="border-t border-line px-3 py-1.5">
           {replying ? <Composer taskId={taskId} parentId={comment.id} onDone={() => setReplying(false)} compact /> : (
-            <button onClick={() => setReplying(true)} className="inline-flex items-center gap-1 text-[11px] text-muted hover:text-fg"><Reply className="size-3" /> Reply</button>
+            <button onClick={() => setReplying(true)} className="inline-flex items-center gap-1 text-[13px] text-muted hover:text-fg"><Reply className="size-3" /> Reply</button>
           )}
         </div>
       )}
@@ -109,13 +109,13 @@ function CommentBody({ c }: { c: TaskComment }) {
   const k = KIND[c.kind];
   return (
     <div className="px-3 py-2">
-      <div className="mb-1 flex items-center gap-2 text-xs">
+      <div className="mb-1 flex items-center gap-2 text-[13px]">
         {a && <Avatar name={a.name} color={a.avatarColor} size={18} />}
         <span className="font-medium text-fg">{a?.name ?? "Unknown"}</span>
         {c.kind !== "discussion" && <Badge tone={k.tone}>{k.icon}{k.label}</Badge>}
-        <span className="text-[11px] text-faint"><Ago iso={c.createdAt} /></span>
+        <span className="text-[13px] text-faint"><Ago iso={c.createdAt} /></span>
       </div>
-      <Markdown className="text-[13px]">{c.body}</Markdown>
+      <Markdown className="text-[15px]">{c.body}</Markdown>
     </div>
   );
 }
@@ -138,11 +138,11 @@ function Composer({ taskId, parentId, onDone, compact }: { taskId: string; paren
     >
       <div className="flex items-center gap-2">
         {!parentId && (
-          <Select value={kind} onChange={(e) => setKind(e.target.value as TaskComment["kind"])} className="h-7 w-44 text-xs" aria-label="Comment type">
+          <Select value={kind} onChange={(e) => setKind(e.target.value as TaskComment["kind"])} className="h-7 w-44 text-[13px]" aria-label="Comment type">
             {Object.entries(KIND).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
           </Select>
         )}
-        <button type="button" onClick={() => setPreview(!preview)} className="inline-flex items-center gap-1 text-[11px] text-muted hover:text-fg"><Pencil className="size-3" /> {preview ? "Edit" : "Preview"}</button>
+        <button type="button" onClick={() => setPreview(!preview)} className="inline-flex items-center gap-1 text-[13px] text-muted hover:text-fg"><Pencil className="size-3" /> {preview ? "Edit" : "Preview"}</button>
       </div>
       <div className="relative">
         {preview ? (
@@ -153,10 +153,10 @@ function Composer({ taskId, parentId, onDone, compact }: { taskId: string; paren
         {suggestions.length > 0 && !preview && (
           <div className="absolute bottom-full left-2 z-10 mb-1 w-56 rounded-md border border-line-strong bg-panel p-1 shadow-[var(--shadow)]">
             {suggestions.map((m) => (
-              <button type="button" key={m.id} onClick={() => setBody(body.replace(/@([\w.-]*)$/, `@${m.githubUsername || mentionHandle(m.name)} `))} className="flex w-full items-center gap-2 rounded px-2 py-1 text-left text-xs hover:bg-panel-3">
+              <button type="button" key={m.id} onClick={() => setBody(body.replace(/@([\w.-]*)$/, `@${m.githubUsername || mentionHandle(m.name)} `))} className="flex w-full items-center gap-2 rounded px-2 py-1 text-left text-[13px] hover:bg-panel-3">
                 <Avatar name={m.name} color={m.avatarColor} size={16} />
                 <span className="truncate">{m.name}</span>
-                <span className="ml-auto font-mono text-[10px] text-faint">@{m.githubUsername || mentionHandle(m.name)}</span>
+                <span className="ml-auto font-mono text-xs text-faint">@{m.githubUsername || mentionHandle(m.name)}</span>
               </button>
             ))}
           </div>

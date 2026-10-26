@@ -6,6 +6,7 @@ import {
   Boxes,
   CalendarRange,
   ClipboardCheck,
+  Compass,
   FlaskConical,
   GanttChart,
   GitFork,
@@ -34,22 +35,22 @@ type NavItem = { href: string; label: string; icon: ReactNode; count?: number };
 
 function NavGroup({ title, items, active, small }: { title?: string; items: NavItem[]; active: (href: string) => boolean; small?: boolean }) {
   return (
-    <div className="space-y-0.5">
-      {title && <div className="px-2 pb-0.5 text-[10px] font-semibold tracking-wider text-faint uppercase">{title}</div>}
+    <div className="space-y-1">
+      {title && <div className="px-3 pb-1 text-xs font-semibold tracking-wider text-faint uppercase">{title}</div>}
       {items.map((item) => (
         <Link
           key={item.href}
           href={item.href}
           aria-current={active(item.href) ? "page" : undefined}
           className={cn(
-            "group flex items-center gap-2.5 rounded-md px-2 text-fg-2 transition-colors hover:bg-panel-3 hover:text-fg [&_svg]:size-4 [&_svg]:text-muted",
-            small ? "py-1 text-xs" : "py-1.5 text-[13px]",
-            active(item.href) && "bg-panel-3 text-fg [&_svg]:text-accent",
+            "group relative flex items-center gap-3 rounded-md px-3 text-fg-2 transition-all duration-200 hover:translate-x-0.5 hover:bg-panel-3 hover:text-fg [&_svg]:size-[18px] [&_svg]:text-muted [&_svg]:transition-colors",
+            small ? "py-1.5 text-[14px]" : "py-2 text-[15px]",
+            active(item.href) && "bg-accent-soft font-medium text-fg [&_svg]:text-accent before:absolute before:inset-y-1.5 before:left-0 before:w-1 before:rounded-full before:bg-accent",
           )}
         >
           {item.icon}
           <span className="flex-1 truncate">{item.label}</span>
-          {!!item.count && <span className="rounded bg-panel-2 px-1.5 font-mono text-[10px] text-muted">{item.count}</span>}
+          {!!item.count && <span className="rounded bg-panel-2 px-1.5 font-mono text-xs text-muted">{item.count}</span>}
         </Link>
       ))}
     </div>
@@ -63,11 +64,12 @@ export function AppShell({ children, counts, realtime }: { children: ReactNode; 
   useEffect(() => setMobileOpen(false), [pathname]);
 
   const nav: NavItem[] = [
+    { href: "/start", label: "Start here", icon: <Compass /> },
     { href: "/", label: "Overview", icon: <LayoutDashboard /> },
     ...(isGuestId(actor.id) ? [] : [{ href: "/my-work", label: "My Tasks", icon: <Inbox />, count: counts.myActive }]),
     { href: "/board", label: "All Tasks", icon: <KanbanSquare /> },
   ];
-  const categories: NavItem[] = tracks.map((t) => ({ href: `/tracks/${t.id}`, label: t.shortName, icon: <span className="flex size-4 items-center justify-center text-[13px] leading-none">{t.emoji}</span> }));
+  const categories: NavItem[] = tracks.map((t) => ({ href: `/tracks/${t.id}`, label: t.shortName, icon: <span className="flex size-[18px] items-center justify-center text-[17px] leading-none">{t.emoji}</span> }));
   const planning: NavItem[] = [
     { href: "/sprints", label: "Sprint Planning", icon: <CalendarRange /> },
     { href: "/graph", label: "Dependency Graph", icon: <GitFork /> },
@@ -88,25 +90,25 @@ export function AppShell({ children, counts, realtime }: { children: ReactNode; 
 
   const sidebar = (
     <nav aria-label="Main" className="flex h-full flex-col">
-      <Link href="/" className="flex items-center gap-2.5 border-b border-line px-3 py-3">
-        <div className="relative flex size-7 items-center justify-center rounded-md bg-accent text-white">
+      <Link href="/" className="flex items-center gap-3 border-b border-line px-4 py-4">
+        <div className="relative flex size-9 items-center justify-center rounded-md bg-accent text-white shadow-[0_6px_18px_-6px_var(--accent)]">
           <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
             <circle cx="12" cy="12" r="8" />
             <path d="M4 12h16M12 4c2.5 2.2 2.5 13.8 0 16" />
           </svg>
         </div>
         <div className="min-w-0 leading-tight">
-          <div className="truncate text-[13px] font-semibold text-fg">Autonomy Command Center</div>
-          <div className="truncate text-[10px] text-muted">{settings.organization}</div>
+          <div className="truncate text-[15px] font-semibold text-fg">Autonomy Command Center</div>
+          <div className="truncate text-xs text-muted">{settings.organization}</div>
         </div>
       </Link>
-      <div className="flex-1 space-y-3 overflow-y-auto px-2 py-2">
+      <div className="flex-1 space-y-5 overflow-y-auto px-3 py-4">
         <NavGroup items={nav} active={active} />
         <NavGroup title="Autonomy team" items={categories} active={active} />
         <NavGroup items={planning} active={active} />
         <NavGroup title="More" items={more} active={active} small />
       </div>
-      <div className="space-y-1 border-t border-line px-3 py-2 text-[10px] text-faint">
+      <div className="space-y-1 border-t border-line px-3 py-2 text-xs text-faint">
         <div className="flex items-center gap-1.5">
           <span className={cn("size-1.5 rounded-full", storage.kind === "supabase" ? "bg-ok" : "bg-warn")} />
           {storage.kind === "supabase" ? "Supabase · persistent" : "Local server store"}
@@ -118,11 +120,11 @@ export function AppShell({ children, counts, realtime }: { children: ReactNode; 
 
   return (
     <div className="flex min-h-screen">
-      <aside className="sticky top-0 hidden h-screen w-[232px] shrink-0 border-r border-line bg-panel lg:block">{sidebar}</aside>
+      <aside className="sticky top-0 hidden h-screen w-[264px] shrink-0 border-r border-line bg-panel/80 backdrop-blur lg:block">{sidebar}</aside>
       {mobileOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
           <div className="absolute inset-0 bg-black/60" onClick={() => setMobileOpen(false)} />
-          <aside className="absolute inset-y-0 left-0 w-[260px] border-r border-line bg-panel">
+          <aside className="absolute inset-y-0 left-0 w-[280px] border-r border-line bg-panel">
             <button className="absolute top-3 right-2 rounded p-1 text-muted hover:text-fg" onClick={() => setMobileOpen(false)} aria-label="Close navigation">
               <X className="size-4" />
             </button>

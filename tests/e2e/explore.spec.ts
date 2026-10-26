@@ -113,3 +113,27 @@ test("task detail shows verified references with source symbols", async ({ page 
   await expect(page.locator("#references").getByText("StallDetector.sensors_callback", { exact: false })).toBeVisible();
   await expect(page.locator("#references").getByRole("link", { name: /Open on GitHub/ })).toHaveAttribute("href", /PurdueLunabotics\/purdue_lunabotics\/blob\/master/);
 });
+
+test("start-here tour explains the mission loop and task lifecycle", async ({ page }) => {
+  await page.goto("/start");
+  await expect(page.getByRole("heading", { level: 1, name: /Welcome to the/ })).toBeVisible();
+  await page.getByRole("button", { name: /Stage 3:/ }).click();
+  await expect(page.getByRole("heading", { name: "Drive to the dig zone" })).toBeVisible();
+  await page.getByRole("button", { name: "In review" }).click();
+  await expect(page.getByText(/reviewer checks the deliverables/)).toBeVisible();
+});
+
+test("guided walkthrough steps through a task and remembers progress", async ({ page }) => {
+  await page.goto("/tasks/SF-01");
+  await page.getByRole("button", { name: "Start walkthrough" }).click();
+  const dialog = page.getByRole("dialog", { name: /Guided walkthrough for SF-01/ });
+  await expect(dialog.getByRole("heading", { name: "Why this task matters" })).toBeVisible();
+  await dialog.getByRole("button", { name: "Done, next step" }).click();
+  await expect(dialog.getByText("Step 2 of")).toBeVisible();
+  await page.keyboard.press("ArrowRight");
+  await expect(dialog.getByText("Step 3 of")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Continue" })).toBeVisible();
+  await expect(page.getByText(/1\/\d+ done/)).toBeVisible();
+});

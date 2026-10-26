@@ -34,12 +34,12 @@ export function ChecklistSection({ data }: { data: TaskDetailData }) {
       actions={
         <div className="flex w-40 items-center gap-2">
           <Progress value={progress.pct} tone={progress.pct === 100 ? "ok" : "info"} label="Checklist progress" />
-          <span className="font-mono text-[11px] text-muted">{progress.done}/{progress.total}</span>
+          <span className="font-mono text-[13px] text-muted">{progress.done}/{progress.total}</span>
         </div>
       }
     >
       {next && canCheck && (
-        <div className="mb-3 flex items-center gap-2 rounded-md border border-info/30 bg-info-soft px-3 py-2 text-xs">
+        <div className="mb-3 flex items-center gap-2 rounded-md border border-info/30 bg-info-soft px-3 py-2 text-[13px]">
           <CornerDownRight className="size-3.5 text-info" />
           <span className="text-muted">Next up:</span>
           <a href={`#step-${next.id}`} className="font-medium text-fg hover:underline">{next.text}</a>
@@ -84,7 +84,7 @@ function StepRow({ item, n, items, data, canCheck, canEdit, onOptimistic, depth 
   };
 
   return (
-    <li id={`step-${item.id}`} className={cn("scroll-mt-36", depth === 0 && "rounded-md border border-line bg-panel-2")}>
+    <li id={`step-${item.id}`} className={cn("scroll-mt-28", depth === 0 && "rounded-md border border-line bg-panel-2")}>
       <div className={cn("flex items-start gap-2.5", depth === 0 ? "px-2.5 py-2" : "py-1 pl-1")}>
         <button
           role="checkbox"
@@ -99,12 +99,12 @@ function StepRow({ item, n, items, data, canCheck, canEdit, onOptimistic, depth 
         </button>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-baseline gap-x-2">
-            {n !== undefined && <span className="font-mono text-[10px] text-faint">STEP {n}</span>}
-            <span className={cn("text-[13px]", item.done ? "text-muted line-through decoration-faint" : "text-fg")}>{item.text}</span>
+            {n !== undefined && <span className="font-mono text-xs text-faint">STEP {n}</span>}
+            <span className={cn("text-[15px]", item.done ? "text-muted line-through decoration-faint" : "text-fg")}>{item.text}</span>
             {!item.required && <Badge>optional</Badge>}
           </div>
-          {item.detail && <p className="mt-0.5 text-xs text-muted">{item.detail}</p>}
-          <div className="mt-1 flex flex-wrap items-center gap-2 text-[10px] text-muted">
+          {item.detail && <p className="mt-0.5 text-[13px] text-muted">{item.detail}</p>}
+          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted">
             {item.resourceIds.map((id) => data.resourceIndex[id]).filter(Boolean).map((r) => (
               <a key={r.id} href={r.url} target="_blank" rel="noreferrer" className="rounded border border-line px-1 py-px hover:text-info">{r.title}</a>
             ))}
@@ -136,13 +136,13 @@ function StepDetails({ item, data, canCheck, canEdit }: { item: ChecklistItem; d
   const { member } = useLookup();
   const [evidence, setEvidence] = useState(item.evidence);
   return (
-    <div className="mx-2.5 mb-2 space-y-2 rounded border border-line bg-panel p-2.5 text-xs">
+    <div className="mx-2.5 mb-2 space-y-2 rounded border border-line bg-panel p-2.5 text-[13px]">
       {canCheck ? (
         <>
           <div className="flex flex-wrap items-center gap-2">
             <UserRound className="size-3.5 text-muted" />
             <span className="text-muted">Owner</span>
-            <Select className="h-7 w-48 text-xs" value={item.ownerId ?? ""} onChange={(e) => run({ type: "checklist.update", itemId: item.id, ownerId: e.target.value || null }, { quiet: true })}>
+            <Select className="h-7 w-48 text-[13px]" value={item.ownerId ?? ""} onChange={(e) => run({ type: "checklist.update", itemId: item.id, ownerId: e.target.value || null }, { quiet: true })}>
               <option value="">Unassigned</option>
               {data.assignments.map((a) => (
                 <option key={a.memberId} value={a.memberId}>{member.get(a.memberId)?.name}</option>
@@ -156,12 +156,12 @@ function StepDetails({ item, data, canCheck, canEdit }: { item: ChecklistItem; d
               void run({ type: "checklist.update", itemId: item.id, evidence });
             }}
           >
-            <Input value={evidence} onChange={(e) => setEvidence(e.target.value)} placeholder="Completion evidence: link to commit, plot, bag, notes…" className="h-7 text-xs" />
+            <Input value={evidence} onChange={(e) => setEvidence(e.target.value)} placeholder="Completion evidence: link to commit, plot, bag, notes…" className="h-7 text-[13px]" />
             <Button type="submit" size="sm" disabled={pending || evidence === item.evidence}>Save</Button>
           </form>
           <AddStep taskId={item.taskId} parentId={item.id} compact />
           {canEdit && (
-            <button onClick={() => confirm("Remove this step and its sub-steps?") && run({ type: "checklist.delete", itemId: item.id })} className="inline-flex items-center gap-1 text-[11px] text-danger hover:underline">
+            <button onClick={() => confirm("Remove this step and its sub-steps?") && run({ type: "checklist.delete", itemId: item.id })} className="inline-flex items-center gap-1 text-[13px] text-danger hover:underline">
               <Trash2 className="size-3" /> Remove step
             </button>
           )}
@@ -179,7 +179,7 @@ function AddStep({ taskId, parentId, compact }: { taskId: string; parentId: stri
   const { run, pending } = useCommand();
   if (!open)
     return (
-      <button onClick={() => setOpen(true)} className={cn("inline-flex items-center gap-1 text-[11px] text-muted hover:text-fg", !compact && "mt-2")}>
+      <button onClick={() => setOpen(true)} className={cn("inline-flex items-center gap-1 text-[13px] text-muted hover:text-fg", !compact && "mt-2")}>
         <Plus className="size-3" /> {parentId ? "Add sub-step" : "Add step"}
       </button>
     );
@@ -191,7 +191,7 @@ function AddStep({ taskId, parentId, compact }: { taskId: string; parentId: stri
         void run({ type: "checklist.add", taskId, parentId, text, required: true }, { quiet: true, onSuccess: () => { setText(""); setOpen(false); } });
       }}
     >
-      <Input autoFocus value={text} onChange={(e) => setText(e.target.value)} placeholder={parentId ? "Sub-step description" : "Step description"} className="h-7 text-xs" minLength={3} required />
+      <Input autoFocus value={text} onChange={(e) => setText(e.target.value)} placeholder={parentId ? "Sub-step description" : "Step description"} className="h-7 text-[13px]" minLength={3} required />
       <Button type="submit" size="sm" variant="primary" disabled={pending}>Add</Button>
       <Button size="sm" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
     </form>

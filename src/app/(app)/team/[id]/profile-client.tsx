@@ -26,19 +26,19 @@ export function ProfileClient({ member: m, tasks, workload, activity, paths, rev
           <Avatar name={m.name} color={m.avatarColor} size={56} />
           <div className="min-w-0 flex-1">
             <h1 className="text-xl font-semibold">{m.name}</h1>
-            <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-muted">
+            <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[13px] text-muted">
               <span>{ROLE_LABEL[m.role]}</span>
               {m.isDemo && <Badge tone="warn">demo account — not a real person</Badge>}
               {m.leadTrackIds.map((t) => <Badge key={t} tone="accent">Leads {t}</Badge>)}
               {m.email && <span>· {m.email}</span>}
             </div>
-            <div className="mt-2 flex flex-wrap items-center gap-3 text-xs">
+            <div className="mt-2 flex flex-wrap items-center gap-3 text-[13px]">
               {m.primaryTrackId && <span>Preferred: <TrackChip trackId={m.primaryTrackId} withName /></span>}
               {m.secondaryTrackId && <span>Secondary: <TrackChip trackId={m.secondaryTrackId} withName /></span>}
               {m.githubUsername && <a href={`https://github.com/${m.githubUsername}`} className="font-mono text-info" target="_blank" rel="noreferrer">github.com/{m.githubUsername}</a>}
               {m.discordHandle && <span className="text-muted">Discord: {m.discordHandle}</span>}
             </div>
-            {m.bio && <p className="mt-2 max-w-2xl text-sm text-fg-2">{m.bio}</p>}
+            {m.bio && <p className="mt-2 max-w-2xl text-[15px] text-fg-2">{m.bio}</p>}
             {m.skills.length > 0 && <div className="mt-2 flex flex-wrap gap-1">{m.skills.map((s) => <Badge key={s}>{s}</Badge>)}</div>}
           </div>
           {(self || can("member.manage")) && <EditProfile member={m} />}
@@ -55,20 +55,20 @@ export function ProfileClient({ member: m, tasks, workload, activity, paths, rev
         <Panel>
           <PanelHeader title="Assignments" />
           <ul className="divide-y divide-line">
-            {tasks.map((t) => <li key={t.id} className="flex items-center gap-2 px-3 py-1.5 text-xs"><TrackChip trackId={t.trackId} /><TaskLink k={t.key} title={t.title} className="min-w-0 flex-1" /><span className="text-[10px] text-muted">{t.assignees.find((a) => a.memberId === m.id)?.role}</span><StatusBadge status={t.status} /></li>)}
-            {!tasks.length && <li className="px-3 py-4 text-xs text-muted">No assignments.</li>}
+            {tasks.map((t) => <li key={t.id} className="flex items-center gap-2 px-3 py-1.5 text-[13px]"><TrackChip trackId={t.trackId} /><TaskLink k={t.key} title={t.title} className="min-w-0 flex-1" /><span className="text-xs text-muted">{t.assignees.find((a) => a.memberId === m.id)?.role}</span><StatusBadge status={t.status} /></li>)}
+            {!tasks.length && <li className="px-3 py-4 text-[13px] text-muted">No assignments.</li>}
           </ul>
         </Panel>
         <div className="space-y-4">
           <Panel>
             <PanelHeader title="Learning paths" />
-            <ul className="divide-y divide-line">{paths.map((p) => <li key={p.slug}><Link href={`/learn/${p.slug}`} className="flex items-center gap-2 px-3 py-1.5 text-xs hover:bg-panel-2"><span className="flex-1 truncate">{p.title}</span><div className="w-20"><Progress value={(p.done / Math.max(1, p.total)) * 100} tone="ok" className="h-1" /></div><span className="font-mono text-[10px] text-muted">{p.done}/{p.total}</span></Link></li>)}</ul>
+            <ul className="divide-y divide-line">{paths.map((p) => <li key={p.slug}><Link href={`/learn/${p.slug}`} className="flex items-center gap-2 px-3 py-1.5 text-[13px] hover:bg-panel-2"><span className="flex-1 truncate">{p.title}</span><div className="w-20"><Progress value={(p.done / Math.max(1, p.total)) * 100} tone="ok" className="h-1" /></div><span className="font-mono text-xs text-muted">{p.done}/{p.total}</span></Link></li>)}</ul>
           </Panel>
           <Panel>
             <PanelHeader title="Recent activity" />
             <ul className="divide-y divide-line">
-              {activity.map((a) => <li key={a.id} className="px-3 py-1.5 text-xs"><span className="text-fg-2">{a.href ? <Link href={a.href} className="hover:underline">{a.summary}</Link> : a.summary}</span><div className="text-[10px] text-faint"><Ago iso={a.createdAt} /></div></li>)}
-              {!activity.length && <li className="px-3 py-4 text-xs text-muted">No activity yet.</li>}
+              {activity.map((a) => <li key={a.id} className="px-3 py-1.5 text-[13px]"><span className="text-fg-2">{a.href ? <Link href={a.href} className="hover:underline">{a.summary}</Link> : a.summary}</span><div className="text-xs text-faint"><Ago iso={a.createdAt} /></div></li>)}
+              {!activity.length && <li className="px-3 py-4 text-[13px] text-muted">No activity yet.</li>}
             </ul>
           </Panel>
         </div>

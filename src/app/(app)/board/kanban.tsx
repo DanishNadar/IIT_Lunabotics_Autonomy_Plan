@@ -27,15 +27,15 @@ function Column({ status, tasks }: { status: TaskStatus; tasks: TaskSummary[] })
     <section ref={setNodeRef} aria-label={`${STATUS_LABEL[status]} column`} className={cn("flex w-[272px] shrink-0 flex-col rounded-lg border border-transparent bg-panel/60 transition-colors", isOver && "border-info/50 bg-info-soft/30")}>
       <header className="flex items-center gap-2 px-2.5 pt-2.5 pb-2">
         <span className={cn("size-2 rounded-full", STATUS_DOT[status])} />
-        <h2 className="text-xs font-semibold text-fg">{STATUS_LABEL[status]}</h2>
-        <span className="font-mono text-[10px] text-muted">{tasks.length}</span>
-        <span className="ml-auto font-mono text-[10px] text-faint">{hours}h</span>
+        <h2 className="text-[13px] font-semibold text-fg">{STATUS_LABEL[status]}</h2>
+        <span className="font-mono text-xs text-muted">{tasks.length}</span>
+        <span className="ml-auto font-mono text-xs text-faint">{hours}h</span>
       </header>
       <div className="flex min-h-24 flex-1 flex-col gap-2 overflow-y-auto px-2 pb-2">
         {tasks.map((t) => (
           <DraggableCard key={t.id} t={t} />
         ))}
-        {tasks.length === 0 && <div className="rounded-md border border-dashed border-line px-2 py-6 text-center text-[11px] text-faint">Drop here</div>}
+        {tasks.length === 0 && <div className="rounded-md border border-dashed border-line px-2 py-6 text-center text-[13px] text-faint">Drop here</div>}
       </div>
     </section>
   );

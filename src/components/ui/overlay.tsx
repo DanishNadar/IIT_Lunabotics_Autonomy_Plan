@@ -39,9 +39,9 @@ export function Dialog({
         >
           <div className="sticky top-0 z-10 flex items-start gap-3 border-b border-line bg-panel px-4 py-3">
             <div className="min-w-0 flex-1">
-              <DialogPrimitive.Title className="text-sm font-semibold text-fg">{title}</DialogPrimitive.Title>
+              <DialogPrimitive.Title className="text-[15px] font-semibold text-fg">{title}</DialogPrimitive.Title>
               {description ? (
-                <DialogPrimitive.Description className="mt-0.5 text-xs text-muted">{description}</DialogPrimitive.Description>
+                <DialogPrimitive.Description className="mt-0.5 text-[13px] text-muted">{description}</DialogPrimitive.Description>
               ) : (
                 <DialogPrimitive.Description className="sr-only">{typeof title === "string" ? title : "Dialog"}</DialogPrimitive.Description>
               )}
@@ -78,7 +78,7 @@ export function MenuItem({ children, onSelect, danger, disabled }: { children: R
       disabled={disabled}
       onSelect={onSelect}
       className={cn(
-        "flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-xs outline-none select-none data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 data-[highlighted]:bg-panel-3 [&_svg]:size-3.5",
+        "flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-[13px] outline-none select-none data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 data-[highlighted]:bg-panel-3 [&_svg]:size-3.5",
         danger ? "text-danger" : "text-fg-2",
       )}
     >
@@ -88,7 +88,7 @@ export function MenuItem({ children, onSelect, danger, disabled }: { children: R
 }
 
 export function MenuLabel({ children }: { children: ReactNode }) {
-  return <DropdownPrimitive.Label className="px-2 pt-1.5 pb-1 text-[10px] font-semibold tracking-wider text-faint uppercase">{children}</DropdownPrimitive.Label>;
+  return <DropdownPrimitive.Label className="px-2 pt-1.5 pb-1 text-xs font-semibold tracking-wider text-faint uppercase">{children}</DropdownPrimitive.Label>;
 }
 
 export const MenuSeparator = () => <DropdownPrimitive.Separator className="my-1 h-px bg-line" />;
@@ -114,7 +114,7 @@ export function Tabs({ value, onValueChange, defaultValue, tabs, children, class
           <TabsPrimitive.Trigger
             key={t.value}
             value={t.value}
-            className="-mb-px flex items-center gap-1.5 border-b-2 border-transparent px-2.5 py-1.5 text-xs font-medium whitespace-nowrap text-muted hover:text-fg data-[state=active]:border-accent data-[state=active]:text-fg [&_svg]:size-3.5"
+            className="-mb-px flex items-center gap-1.5 border-b-2 border-transparent px-2.5 py-1.5 text-[13px] font-medium whitespace-nowrap text-muted hover:text-fg data-[state=active]:border-accent data-[state=active]:text-fg [&_svg]:size-3.5"
           >
             {t.label}
           </TabsPrimitive.Trigger>
@@ -136,7 +136,7 @@ export function Tip({ content, children }: { content: ReactNode; children: React
     <TooltipPrimitive.Root delayDuration={250}>
       <TooltipPrimitive.Trigger asChild>{children}</TooltipPrimitive.Trigger>
       <TooltipPrimitive.Portal>
-        <TooltipPrimitive.Content sideOffset={4} className="z-50 max-w-xs rounded border border-line-strong bg-panel-3 px-2 py-1 text-[11px] text-fg shadow-[var(--shadow)]">
+        <TooltipPrimitive.Content sideOffset={4} className="z-50 max-w-xs rounded border border-line-strong bg-panel-3 px-2 py-1 text-[13px] text-fg shadow-[var(--shadow)]">
           {content}
         </TooltipPrimitive.Content>
       </TooltipPrimitive.Portal>

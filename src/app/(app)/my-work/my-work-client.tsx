@@ -42,7 +42,7 @@ export function MyWorkClient(p: Props) {
       <div className="flex flex-wrap items-end gap-3">
         <div className="flex-1">
           <h1 className="text-xl font-semibold">My tasks</h1>
-          <p className="text-xs text-muted">
+          <p className="text-[13px] text-muted">
             {active.length} active task(s) · ~{p.workload.remainingHours}h remaining estimated against {p.workload.weeklyAvailability}h/week availability ·{" "}
             <span className={cn(wl.tone === "warn" && "text-warn", wl.tone === "ok" && "text-ok")}>{wl.label}</span>
           </p>
@@ -55,23 +55,23 @@ export function MyWorkClient(p: Props) {
           <div className="flex flex-wrap items-start gap-4 p-4">
             <PlayCircle className="mt-0.5 size-6 text-info" />
             <div className="min-w-0 flex-1 space-y-1.5">
-              <p className="text-[11px] font-semibold tracking-wider text-info uppercase">Continue working</p>
+              <p className="text-[13px] font-semibold tracking-wider text-info uppercase">Continue working</p>
               <div className="flex flex-wrap items-center gap-2">
-                <TaskLink k={p.resume.task.key} title={p.resume.task.title} className="text-sm font-medium" />
+                <TaskLink k={p.resume.task.key} title={p.resume.task.title} className="text-[15px] font-medium" />
                 <StatusBadge status={p.resume.task.status} />
               </div>
               {p.resume.step ? (
-                <p className="text-[13px] text-fg">
+                <p className="text-[15px] text-fg">
                   Next step: <Link href={`/tasks/${p.resume.task.key}#step-${p.resume.step.id}`} className="font-medium hover:underline">{p.resume.step.text}</Link>
                 </p>
               ) : (
-                <p className="text-[13px] text-ok">All steps complete — submit deliverables and request review.</p>
+                <p className="text-[15px] text-ok">All steps complete — submit deliverables and request review.</p>
               )}
-              {p.resume.lastLog && <p className="text-xs text-muted">Last session <Ago iso={p.resume.lastLog.createdAt} />: {p.resume.lastLog.nextSteps ? `planned “${p.resume.lastLog.nextSteps}”` : p.resume.lastLog.workedOn}</p>}
+              {p.resume.lastLog && <p className="text-[13px] text-muted">Last session <Ago iso={p.resume.lastLog.createdAt} />: {p.resume.lastLog.nextSteps ? `planned “${p.resume.lastLog.nextSteps}”` : p.resume.lastLog.workedOn}</p>}
               {p.resume.resources.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 pt-1">
                   {p.resume.resources.map((r) => (
-                    <a key={r.id} href={r.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded border border-line bg-panel-2 px-1.5 py-0.5 text-[11px] text-fg-2 hover:text-info">
+                    <a key={r.id} href={r.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded border border-line bg-panel-2 px-1.5 py-0.5 text-[13px] text-fg-2 hover:text-info">
                       <BookMarked className="size-3" /> {r.title}
                     </a>
                   ))}
@@ -103,10 +103,10 @@ export function MyWorkClient(p: Props) {
             {active.length ? (
               <div className="grid gap-2 p-3 md:grid-cols-2">{active.map((t) => <TaskCard key={t.id} t={t} />)}</div>
             ) : (
-              <p className="p-4 text-xs text-muted">Nothing assigned.</p>
+              <p className="p-4 text-[13px] text-muted">Nothing assigned.</p>
             )}
             {p.claims.length > 0 && (
-              <div className="border-t border-line px-3 py-2 text-xs text-muted">
+              <div className="border-t border-line px-3 py-2 text-[13px] text-muted">
                 <Hand className="mr-1 inline size-3" /> Pending requests: {p.claims.map((c) => <Link key={c.id} href={`/tasks/${c.taskKey}`} className="mr-2 text-fg-2 hover:underline">{c.taskKey} ({c.kind})</Link>)}
               </div>
             )}
@@ -117,7 +117,7 @@ export function MyWorkClient(p: Props) {
             {p.reviews.length ? (
               <ul className="divide-y divide-line">
                 {p.reviews.map((t) => (
-                  <li key={t.id} className="flex items-center gap-2 px-3 py-2 text-xs">
+                  <li key={t.id} className="flex items-center gap-2 px-3 py-2 text-[13px]">
                     <TrackChip trackId={t.trackId} />
                     <TaskLink k={t.key} title={t.title} className="min-w-0 flex-1" />
                     <span className="text-muted">waiting <Ago iso={t.statusChangedAt} /></span>
@@ -125,7 +125,7 @@ export function MyWorkClient(p: Props) {
                   </li>
                 ))}
               </ul>
-            ) : <p className="p-4 text-xs text-muted">No reviews waiting on you.</p>}
+            ) : <p className="p-4 text-[13px] text-muted">No reviews waiting on you.</p>}
           </Panel>
 
           <Panel>
@@ -133,7 +133,7 @@ export function MyWorkClient(p: Props) {
             {p.suggestions.length ? (
               <ul className="divide-y divide-line">
                 {p.suggestions.map((t) => (
-                  <li key={t.id} className="flex items-center gap-2 px-3 py-2 text-xs">
+                  <li key={t.id} className="flex items-center gap-2 px-3 py-2 text-[13px]">
                     <TrackChip trackId={t.trackId} />
                     <TaskLink k={t.key} title={t.title} className="min-w-0 flex-1" />
                     <DifficultyMeter difficulty={t.difficulty} label />
@@ -141,7 +141,7 @@ export function MyWorkClient(p: Props) {
                   </li>
                 ))}
               </ul>
-            ) : <p className="p-4 text-xs text-muted">No suggestions right now.</p>}
+            ) : <p className="p-4 text-[13px] text-muted">No suggestions right now.</p>}
           </Panel>
         </div>
 
@@ -151,14 +151,14 @@ export function MyWorkClient(p: Props) {
             {p.todos.length ? (
               <ul className="divide-y divide-line">
                 {p.todos.map((t) => (
-                  <li key={t.id} className="flex items-start gap-2 px-3 py-1.5 text-xs">
+                  <li key={t.id} className="flex items-start gap-2 px-3 py-1.5 text-[13px]">
                     <button onClick={() => run({ type: "checklist.toggle", itemId: t.id, done: true }, { quiet: true })} className="mt-0.5 size-3.5 shrink-0 rounded border border-line-strong hover:border-ok" aria-label={`Complete: ${t.text}`} />
                     <Link href={`/tasks/${t.taskKey}#step-${t.id}`} className="min-w-0 flex-1 text-fg-2 hover:text-fg">{t.text}</Link>
-                    <span className="font-mono text-[10px] text-muted">{t.taskKey}</span>
+                    <span className="font-mono text-xs text-muted">{t.taskKey}</span>
                   </li>
                 ))}
               </ul>
-            ) : <p className="p-4 text-xs text-muted">No open steps.</p>}
+            ) : <p className="p-4 text-[13px] text-muted">No open steps.</p>}
           </Panel>
 
           {p.blockers.length > 0 && (
@@ -166,9 +166,9 @@ export function MyWorkClient(p: Props) {
               <PanelHeader title="Relevant blockers" icon={<AlertOctagon />} />
               <ul className="divide-y divide-line">
                 {p.blockers.map((b) => (
-                  <li key={b.id} className="px-3 py-2 text-xs">
+                  <li key={b.id} className="px-3 py-2 text-[13px]">
                     <TaskLink k={b.taskKey} /> <span className="text-fg-2">{b.description}</span>
-                    <div className="text-[10px] text-faint"><Ago iso={b.createdAt} /></div>
+                    <div className="text-xs text-faint"><Ago iso={b.createdAt} /></div>
                   </li>
                 ))}
               </ul>
@@ -181,7 +181,7 @@ export function MyWorkClient(p: Props) {
               <ul className="divide-y divide-line">
                 {p.comments.map((c) => (
                   <li key={c.id}>
-                    <Link href={`/tasks/${c.taskKey}#comment-${c.id}`} className="block px-3 py-2 text-xs hover:bg-panel-2">
+                    <Link href={`/tasks/${c.taskKey}#comment-${c.id}`} className="block px-3 py-2 text-[13px] hover:bg-panel-2">
                       <div className="flex items-center gap-1.5">
                         {c.mention && <AtSign className="size-3 text-info" />}
                         <span className="text-fg">{member.get(c.authorId)?.name}</span>
@@ -192,18 +192,18 @@ export function MyWorkClient(p: Props) {
                   </li>
                 ))}
               </ul>
-            ) : <p className="p-4 text-xs text-muted">No recent comments.</p>}
+            ) : <p className="p-4 text-[13px] text-muted">No recent comments.</p>}
           </Panel>
 
           <Panel>
-            <PanelHeader title="Learning" icon={<GraduationCap />} actions={<Link href="/learn" className="text-[11px] text-muted hover:text-fg">All paths →</Link>} />
+            <PanelHeader title="Learning" icon={<GraduationCap />} actions={<Link href="/learn" className="text-[13px] text-muted hover:text-fg">All paths →</Link>} />
             <ul className="divide-y divide-line">
               {p.paths.map((x) => (
                 <li key={x.slug}>
-                  <Link href={`/learn/${x.slug}`} className="flex items-center gap-2 px-3 py-1.5 text-xs hover:bg-panel-2">
+                  <Link href={`/learn/${x.slug}`} className="flex items-center gap-2 px-3 py-1.5 text-[13px] hover:bg-panel-2">
                     <span className="min-w-0 flex-1 truncate text-fg-2">{x.title}</span>
                     <div className="w-24"><Progress value={(x.done / Math.max(1, x.total)) * 100} tone="ok" className="h-1" /></div>
-                    <span className="w-8 text-right font-mono text-[10px] text-muted">{x.done}/{x.total}</span>
+                    <span className="w-8 text-right font-mono text-xs text-muted">{x.done}/{x.total}</span>
                   </Link>
                 </li>
               ))}

@@ -50,15 +50,15 @@ export function CodeBlock({ code, language, title, label, note, bare }: { code: 
   return (
     <div className={cn("overflow-hidden rounded-md border border-line bg-panel-2", !bare && "my-0")}>
       <div className="flex items-center gap-2 border-b border-line px-2.5 py-1">
-        {title && <span className="truncate text-[11px] font-medium text-fg-2">{title}</span>}
-        <span className="font-mono text-[10px] text-faint uppercase">{language}</span>
+        {title && <span className="truncate text-[13px] font-medium text-fg-2">{title}</span>}
+        <span className="font-mono text-xs text-faint uppercase">{language}</span>
         {l && (
           <Badge tone={l.tone} title={l.tip}>
             {l.text}
           </Badge>
         )}
         <button
-          className="ml-auto flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] text-muted hover:bg-panel-3 hover:text-fg"
+          className="ml-auto flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-muted hover:bg-panel-3 hover:text-fg"
           onClick={() => {
             void navigator.clipboard?.writeText(code);
             setCopied(true);
@@ -70,10 +70,10 @@ export function CodeBlock({ code, language, title, label, note, bare }: { code: 
           {copied ? "Copied" : "Copy"}
         </button>
       </div>
-      <pre className="overflow-x-auto p-2.5 font-mono text-[12px] leading-relaxed text-fg-2">
+      <pre className="overflow-x-auto p-2.5 font-mono text-sm leading-relaxed text-fg-2">
         <code>{code}</code>
       </pre>
-      {note && <p className="border-t border-line px-2.5 py-1.5 text-[11px] text-muted">{note}</p>}
+      {note && <p className="border-t border-line px-2.5 py-1.5 text-[13px] text-muted">{note}</p>}
     </div>
   );
 }

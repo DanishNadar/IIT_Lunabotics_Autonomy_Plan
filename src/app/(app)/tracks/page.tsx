@@ -12,7 +12,7 @@ export default async function TracksPage() {
     <div className="mx-auto max-w-[1400px] space-y-4 p-4">
       <div>
         <h1 className="text-xl font-semibold">Autonomy team</h1>
-        <p className="text-xs text-muted">Four technical subteams and Autonomy General, one per Discord channel. Other teams (Controls, Electrical, Mechanical) appear only where their interfaces affect autonomy.</p>
+        <p className="text-[13px] text-muted">Four technical subteams and Autonomy General, one per Discord channel. Other teams (Controls, Electrical, Mechanical) appear only where their interfaces affect autonomy.</p>
       </div>
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {db.tracks.map((tr) => {
@@ -32,16 +32,16 @@ export default async function TracksPage() {
             <Link key={tr.id} href={`/tracks/${tr.id}`} className="group rounded-lg border border-line bg-panel p-4 hover:border-line-strong">
               <div className="flex items-center gap-2">
                 <span aria-hidden className="text-base">{tr.emoji}</span>
-                <h2 className="text-sm font-semibold group-hover:underline">{tr.name}</h2>
-                <span className="ml-auto font-mono text-[10px] text-muted">{tr.emoji} {tr.discordChannel}</span>
+                <h2 className="text-[15px] font-semibold group-hover:underline">{tr.name}</h2>
+                <span className="ml-auto font-mono text-xs text-muted">{tr.emoji} {tr.discordChannel}</span>
               </div>
-              <p className="mt-2 line-clamp-2 text-xs text-fg-2">{tr.mission}</p>
+              <p className="mt-2 line-clamp-2 text-[13px] text-fg-2">{tr.mission}</p>
               <div className="mt-3 grid grid-cols-4 gap-2 text-center">
                 {[["Initial", init.length], ["Advanced", tasks.length - init.length], ["Active", active], ["Approved", done]].map(([l, v]) => (
-                  <div key={l as string}><div className="font-mono text-base font-semibold">{v}</div><div className="text-[10px] text-muted uppercase">{l}</div></div>
+                  <div key={l as string}><div className="font-mono text-base font-semibold">{v}</div><div className="text-xs text-muted uppercase">{l}</div></div>
                 ))}
               </div>
-              <div className="mt-3 space-y-1 text-[11px] text-muted">
+              <div className="mt-3 space-y-1 text-[13px] text-muted">
                 <div className="flex justify-between"><span>Approved tasks</span><span className="font-mono">{pct(done, init.length)}%</span></div>
                 <div className="h-1 rounded-full bg-panel-3"><div className="h-full rounded-full bg-ok" style={{ width: `${pct(done, init.length)}%` }} /></div>
                 <div className="flex justify-between"><span>Checklist steps done</span><span className="font-mono">{steps.done}/{steps.total}</span></div>

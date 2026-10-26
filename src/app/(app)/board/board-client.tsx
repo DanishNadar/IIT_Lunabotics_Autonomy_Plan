@@ -86,11 +86,11 @@ export function BoardClient({ tasks, savedViews }: { tasks: TaskSummary[]; saved
           <h1 className="mr-2 text-[15px] font-semibold">All Tasks</h1>
           <div className="relative w-full max-w-xs">
             <Search className="pointer-events-none absolute top-2 left-2 size-3.5 text-faint" />
-            <Input value={filters.q ?? ""} onChange={(e) => setFilters({ ...filters, q: e.target.value })} placeholder="Filter by ID, title, technical content…" className="h-7 pl-7 text-xs" aria-label="Filter tasks" />
+            <Input value={filters.q ?? ""} onChange={(e) => setFilters({ ...filters, q: e.target.value })} placeholder="Filter by ID, title, technical content…" className="h-7 pl-7 text-[13px]" aria-label="Filter tasks" />
           </div>
           <div className="flex items-center rounded-md border border-line bg-panel p-0.5" role="tablist" aria-label="Board view">
             {VIEWS.map((v) => (
-              <button key={v.id} role="tab" aria-selected={view === v.id} onClick={() => setView(v.id)} title={v.label} className={cn("flex items-center gap-1 rounded px-2 py-1 text-xs [&_svg]:size-3.5", view === v.id ? "bg-panel-3 text-fg" : "text-muted hover:text-fg")}>
+              <button key={v.id} role="tab" aria-selected={view === v.id} onClick={() => setView(v.id)} title={v.label} className={cn("flex items-center gap-1 rounded px-2 py-1 text-[13px] [&_svg]:size-3.5", view === v.id ? "bg-panel-3 text-fg" : "text-muted hover:text-fg")}>
                 {v.icon}
                 <span className="hidden xl:inline">{v.label}</span>
               </button>
@@ -105,7 +105,7 @@ export function BoardClient({ tasks, savedViews }: { tasks: TaskSummary[]; saved
               }
             >
               <MenuLabel>Saved views</MenuLabel>
-              {savedViews.length === 0 && <div className="px-2 py-1.5 text-[11px] text-faint">No saved views yet</div>}
+              {savedViews.length === 0 && <div className="px-2 py-1.5 text-[13px] text-faint">No saved views yet</div>}
               {savedViews.map((v) => (
                 <div key={v.id} className="flex items-center">
                   <div className="flex-1">
@@ -142,7 +142,7 @@ export function BoardClient({ tasks, savedViews }: { tasks: TaskSummary[]; saved
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <FilterBar filters={filters} onChange={setFilters} />
-          <span className="ml-auto font-mono text-[11px] text-muted">
+          <span className="ml-auto font-mono text-[13px] text-muted">
             {visible.length} / {tasks.filter((t) => !t.archived).length} tasks
           </span>
         </div>

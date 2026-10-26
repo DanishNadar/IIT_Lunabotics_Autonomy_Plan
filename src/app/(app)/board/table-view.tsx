@@ -27,11 +27,11 @@ export function TableView({ tasks }: { tasks: TaskSummary[] }) {
       col.accessor("priority", { header: "Priority", cell: (c) => <PriorityBadge priority={c.getValue()} />, sortingFn: (a, b) => PRIO[a.original.priority] - PRIO[b.original.priority] }),
       col.accessor("difficulty", { header: "Difficulty", cell: (c) => <DifficultyMeter difficulty={c.getValue()} label />, sortingFn: (a, b) => DIFF[a.original.difficulty] - DIFF[b.original.difficulty] }),
       col.accessor("estimateHours", { header: "Est.", cell: (c) => <span className="font-mono text-muted">{c.getValue()}h</span> }),
-      col.accessor((t) => t.progress.pct, { id: "progress", header: "Progress", cell: (c) => <div className="flex w-24 items-center gap-1.5"><Progress value={c.getValue()} className="h-1" /><span className="font-mono text-[10px] text-muted">{c.getValue()}%</span></div> }),
+      col.accessor((t) => t.progress.pct, { id: "progress", header: "Progress", cell: (c) => <div className="flex w-24 items-center gap-1.5"><Progress value={c.getValue()} className="h-1" /><span className="font-mono text-xs text-muted">{c.getValue()}%</span></div> }),
       col.accessor((t) => t.assignees.length, { id: "assignees", header: "Assignees", cell: (c) => <AssigneeStack assignees={c.row.original.assignees} /> }),
       col.accessor((t) => (t.sprintId ? sprint.get(t.sprintId)?.name ?? "" : ""), { id: "sprint", header: "Sprint", cell: (c) => <span className="text-muted">{c.getValue() || "—"}</span> }),
       col.accessor((t) => (t.milestoneId ? milestone.get(t.milestoneId)?.name.split("·")[0] ?? "" : ""), { id: "milestone", header: "Milestone", cell: (c) => <span className="text-muted">{c.getValue() || "—"}</span> }),
-      col.accessor("dueDate", { header: "Due", cell: (c) => <span className="font-mono text-[11px] text-muted">{day(c.getValue())}</span> }),
+      col.accessor("dueDate", { header: "Due", cell: (c) => <span className="font-mono text-[13px] text-muted">{day(c.getValue())}</span> }),
       col.display({ id: "signals", header: "Signals", cell: (c) => <div className="flex items-center gap-2"><DepIndicator t={c.row.original} /><PrIndicator pr={c.row.original.pr} /><TestingIndicator testing={c.row.original.testing} /></div> }),
     ],
     [sprint, milestone, subtrack],
@@ -40,12 +40,12 @@ export function TableView({ tasks }: { tasks: TaskSummary[] }) {
   return (
     <div className="p-3">
       <div className="overflow-x-auto rounded-lg border border-line">
-        <table className="w-full text-xs">
+        <table className="w-full text-[13px]">
           <thead className="sticky top-0 bg-panel-2">
             {table.getHeaderGroups().map((hg) => (
               <tr key={hg.id}>
                 {hg.headers.map((h) => (
-                  <th key={h.id} className="border-b border-line px-2.5 py-2 text-left text-[10px] font-semibold tracking-wider whitespace-nowrap text-muted uppercase">
+                  <th key={h.id} className="border-b border-line px-2.5 py-2 text-left text-xs font-semibold tracking-wider whitespace-nowrap text-muted uppercase">
                     {h.column.getCanSort() ? (
                       <button onClick={h.column.getToggleSortingHandler()} className="inline-flex items-center gap-1 hover:text-fg">
                         {flexRender(h.column.columnDef.header, h.getContext())}
@@ -71,7 +71,7 @@ export function TableView({ tasks }: { tasks: TaskSummary[] }) {
             ))}
           </tbody>
         </table>
-        {tasks.length === 0 && <p className="py-10 text-center text-xs text-muted">No tasks match these filters.</p>}
+        {tasks.length === 0 && <p className="py-10 text-center text-[13px] text-muted">No tasks match these filters.</p>}
       </div>
     </div>
   );

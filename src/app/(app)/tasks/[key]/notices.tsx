@@ -18,7 +18,7 @@ export function TaskNotices({ data }: { data: TaskDetailData }) {
   return (
     <>
       {task.archived && (
-        <div className="flex flex-wrap items-start gap-3 rounded-lg border border-line-strong bg-panel-2 px-4 py-3 text-xs">
+        <div className="flex flex-wrap items-start gap-3 rounded-lg border border-line-strong bg-panel-2 px-4 py-3 text-[13px]">
           <Archive className="mt-0.5 size-4 text-muted" />
           <div className="min-w-0 flex-1">
             <p className="font-semibold text-fg">Archived — outside autonomy scope{task.externalTeam ? `; implementation is owned by ${task.externalTeam}` : ""}.</p>
@@ -33,7 +33,7 @@ export function TaskNotices({ data }: { data: TaskDetailData }) {
         </div>
       )}
       {(task.legacyKeys.length > 0 || from) && (
-        <div className="flex items-start gap-2 rounded-lg border border-info/30 bg-info-soft px-4 py-2.5 text-xs">
+        <div className="flex items-start gap-2 rounded-lg border border-info/30 bg-info-soft px-4 py-2.5 text-[13px]">
           <ArrowRightLeft className="mt-0.5 size-3.5 text-info" />
           <p className="text-fg-2">
             {from && from !== task.key && <>You followed a link to <span className="font-mono">{from}</span>, which is now <span className="font-mono font-semibold">{task.key}</span>. </>}
@@ -42,7 +42,7 @@ export function TaskNotices({ data }: { data: TaskDetailData }) {
         </div>
       )}
       {data.keyHistory.length > 0 && (
-        <div className="flex items-start gap-2 rounded-lg border border-warn/30 bg-warn-soft px-4 py-2.5 text-xs">
+        <div className="flex items-start gap-2 rounded-lg border border-warn/30 bg-warn-soft px-4 py-2.5 text-[13px]">
           <Link2 className="mt-0.5 size-3.5 text-warn" />
           <p className="text-fg-2">
             Before the autonomy restructure (2026-10-25), <span className="font-mono">{task.key}</span> referred to a different task:{" "}
@@ -57,7 +57,7 @@ export function TaskNotices({ data }: { data: TaskDetailData }) {
         </div>
       )}
       {data.externalDependencies.length > 0 && (
-        <div className="rounded-lg border border-line bg-panel px-4 py-2.5 text-xs">
+        <div className="rounded-lg border border-line bg-panel px-4 py-2.5 text-[13px]">
           <div className="mb-1 flex items-center gap-1.5 font-semibold text-fg"><PlugZap className="size-3.5 text-muted" /> Depends on other teams</div>
           <ul className="space-y-1">
             {data.externalDependencies.map((d) => (
@@ -69,7 +69,7 @@ export function TaskNotices({ data }: { data: TaskDetailData }) {
               </li>
             ))}
           </ul>
-          <Link href="/tracks/AG#external" className="mt-1 inline-block text-[11px] text-info hover:underline">Track all external dependencies →</Link>
+          <Link href="/tracks/AG#external" className="mt-1 inline-block text-[13px] text-info hover:underline">Track all external dependencies →</Link>
         </div>
       )}
     </>

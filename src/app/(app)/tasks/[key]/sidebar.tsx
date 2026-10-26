@@ -17,7 +17,7 @@ function Card({ title, actions, children }: { title: string; actions?: React.Rea
   return (
     <div className="rounded-lg border border-line bg-panel">
       <div className="flex items-center gap-2 border-b border-line px-3 py-2">
-        <h3 className="flex-1 text-[11px] font-semibold tracking-wider text-muted uppercase">{title}</h3>
+        <h3 className="flex-1 text-[13px] font-semibold tracking-wider text-muted uppercase">{title}</h3>
         {actions}
       </div>
       <div className="p-3">{children}</div>
@@ -39,7 +39,7 @@ export function TaskSidebar({ data }: { data: TaskDetailData }) {
     <aside className="space-y-3 lg:sticky lg:top-[120px] lg:max-h-[calc(100vh-140px)] lg:self-start lg:overflow-y-auto">
       <Card title="People" actions={canAssign ? <AssignDialog data={data} /> : null}>
         {assignments.length === 0 ? (
-          <p className="text-xs text-muted">No one assigned yet.{task.claimable && task.status === "available" ? " Members can request or claim this task." : ""}</p>
+          <p className="text-[13px] text-muted">No one assigned yet.{task.claimable && task.status === "available" ? " Members can request or claim this task." : ""}</p>
         ) : (
           <ul className="space-y-2">
             {[...assignments].sort((a) => (a.role === "owner" ? -1 : 1)).map((a) => {
@@ -49,8 +49,8 @@ export function TaskSidebar({ data }: { data: TaskDetailData }) {
                 <li key={a.id} className="flex items-start gap-2">
                   <Avatar name={m.name} color={m.avatarColor} size={24} />
                   <div className="min-w-0 flex-1">
-                    <a href={`/team/${m.id}`} className="block truncate text-xs font-medium text-fg hover:underline">{m.name}</a>
-                    <div className="text-[11px] text-muted">{a.role === "owner" ? "Primary owner" : "Contributor"}{a.responsibility && a.responsibility !== "Primary owner" ? ` · ${a.responsibility}` : ""}</div>
+                    <a href={`/team/${m.id}`} className="block truncate text-[13px] font-medium text-fg hover:underline">{m.name}</a>
+                    <div className="text-[13px] text-muted">{a.role === "owner" ? "Primary owner" : "Contributor"}{a.responsibility && a.responsibility !== "Primary owner" ? ` · ${a.responsibility}` : ""}</div>
                   </div>
                   {(canAssign || a.memberId === actor.id) && (
                     <button onClick={() => confirm(`Remove ${m.name} from ${task.key}?`) && run({ type: "task.unassign", assignmentId: a.id })} className="text-faint hover:text-danger" aria-label={`Unassign ${m.name}`}>
@@ -62,17 +62,17 @@ export function TaskSidebar({ data }: { data: TaskDetailData }) {
             })}
           </ul>
         )}
-        <div className="mt-3 border-t border-line pt-2 text-xs">
+        <div className="mt-3 border-t border-line pt-2 text-[13px]">
           <span className="text-muted">Reviewer: </span>
           {reviewer ? <span className="text-fg">{reviewer.name}</span> : <span className="text-faint">Any track lead</span>}
         </div>
         {pendingClaims.length > 0 && (
           <div className="mt-3 space-y-1.5 border-t border-line pt-2">
-            <div className="text-[11px] font-semibold text-muted uppercase">Requests & interest</div>
+            <div className="text-[13px] font-semibold text-muted uppercase">Requests & interest</div>
             {pendingClaims.map((c) => {
               const m = member.get(c.memberId);
               return (
-                <div key={c.id} className="flex items-center gap-2 text-xs">
+                <div key={c.id} className="flex items-center gap-2 text-[13px]">
                   {m && <Avatar name={m.name} color={m.avatarColor} size={18} />}
                   <span className="min-w-0 flex-1 truncate">{m?.name} <span className="text-muted">· {c.kind}</span></span>
                   {can("task.decideClaim", { task }) && (
@@ -89,7 +89,7 @@ export function TaskSidebar({ data }: { data: TaskDetailData }) {
       </Card>
 
       <Card title="Planning">
-        <dl className="grid grid-cols-[90px_1fr] gap-y-1.5 text-xs">
+        <dl className="grid grid-cols-[90px_1fr] gap-y-1.5 text-[13px]">
           <dt className="text-muted">Sprint</dt>
           <dd>{task.sprintId ? sprint.get(task.sprintId)?.name : <span className="text-faint">—</span>}</dd>
           <dt className="text-muted">Milestone</dt>
@@ -108,8 +108,8 @@ export function TaskSidebar({ data }: { data: TaskDetailData }) {
       <GithubCard data={data} />
 
       <Card title="Branch & PR conventions">
-        <code className="block rounded bg-panel-2 px-2 py-1 font-mono text-[11px] break-all text-fg-2">feature/{task.key}-{task.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40)}</code>
-        <code className="mt-1 block rounded bg-panel-2 px-2 py-1 font-mono text-[11px] text-fg-2">[{task.key}] {task.title}</code>
+        <code className="block rounded bg-panel-2 px-2 py-1 font-mono text-[13px] break-all text-fg-2">feature/{task.key}-{task.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40)}</code>
+        <code className="mt-1 block rounded bg-panel-2 px-2 py-1 font-mono text-[13px] text-fg-2">[{task.key}] {task.title}</code>
       </Card>
     </aside>
   );
@@ -180,21 +180,21 @@ function GithubCard({ data }: { data: TaskDetailData }) {
     >
       {adding && (
         <form className="mb-2 flex gap-1.5" onSubmit={(e) => { e.preventDefault(); void run({ type: "github.link", taskId: data.task.id, url, title: "" }, { onSuccess: () => { setUrl(""); setAdding(false); } }); }}>
-          <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="PR, issue, commit or branch URL" className="h-7 text-xs" type="url" required />
+          <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="PR, issue, commit or branch URL" className="h-7 text-[13px]" type="url" required />
           <Button type="submit" size="sm" disabled={pending}>Link</Button>
         </form>
       )}
       {data.links.length === 0 ? (
-        <p className="text-xs text-muted">No pull requests or issues linked. A merged PR does not complete the task — review does.</p>
+        <p className="text-[13px] text-muted">No pull requests or issues linked. A merged PR does not complete the task — review does.</p>
       ) : (
         <ul className="space-y-1.5">
           {data.links.map((l) => (
-            <li key={l.id} className="flex items-start gap-2 text-xs [&_svg]:size-3.5">
+            <li key={l.id} className="flex items-start gap-2 text-[13px] [&_svg]:size-3.5">
               <span className="mt-0.5">{icon(l.kind, l.state)}</span>
               <div className="min-w-0 flex-1">
                 <a href={l.url} target="_blank" rel="noreferrer" className="block truncate text-fg hover:text-info">{l.title}</a>
-                <div className="text-[10px] text-muted">
-                  {l.kind} · {l.state}{l.checks !== "unknown" ? ` · checks ${l.checks}` : ""}{l.syncedAt ? ` · synced $<Ago iso={l.syncedAt} />` : " · not synced"}
+                <div className="text-xs text-muted">
+                  {l.kind} · {l.state}{l.checks !== "unknown" ? ` · checks ${l.checks}` : ""}{l.syncedAt ? <> · synced <Ago iso={l.syncedAt} /></> : " · not synced"}
                 </div>
               </div>
               {canLink && <button onClick={() => run({ type: "github.unlink", linkId: l.id })} className="text-faint hover:text-danger" aria-label="Unlink"><X /></button>}

@@ -32,16 +32,16 @@ export function Topbar({ unread, reviewQueue, leading }: { unread: number; revie
   };
 
   return (
-    <header className="sticky top-0 z-30 flex h-11 items-center gap-2 border-b border-line bg-bg/90 px-3 backdrop-blur">
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-line bg-bg/80 px-4 backdrop-blur-md sm:px-6">
       {leading}
       <button
         onClick={openPalette}
-        className="flex h-7 w-full max-w-sm items-center gap-2 rounded-md border border-line bg-panel px-2 text-xs text-faint hover:border-line-strong"
+        className="flex h-10 w-full max-w-md items-center gap-2.5 rounded-full border border-line bg-panel px-4 text-[15px] text-faint transition-colors hover:border-line-strong"
         aria-label="Search (Ctrl+K)"
       >
-        <Search className="size-3.5" />
-        <span className="flex-1 text-left">Search tasks, docs, resources…</span>
-        <Kbd>Ctrl K</Kbd>
+        <Search className="size-4" />
+        <span className="min-w-0 flex-1 truncate text-left">Search tasks, docs, resources…</span>
+        <span className="hidden sm:inline"><Kbd>Ctrl K</Kbd></span>
       </button>
       <div className="ml-auto flex items-center gap-1">
         {reviewQueue > 0 && (
@@ -60,7 +60,7 @@ export function Topbar({ unread, reviewQueue, leading }: { unread: number; revie
           trigger={
             <button className="flex items-center gap-2 rounded-md py-1 pr-1 pl-1.5 hover:bg-panel-3" aria-label="Account menu">
               <Avatar name={actor.name} color={actor.avatarColor} size={22} />
-              <span className="hidden max-w-[140px] truncate text-xs text-fg-2 md:inline">{actor.name}</span>
+              <span className="hidden max-w-[140px] truncate text-[13px] text-fg-2 md:inline">{actor.name}</span>
             </button>
           }
         >
@@ -106,14 +106,14 @@ function Notifications({ unread }: { unread: number }) {
       trigger={
         <button onClick={load} className="relative rounded p-1.5 text-muted hover:bg-panel-3 hover:text-fg" aria-label={`Notifications (${unread} unread)`}>
           <Bell className="size-4" />
-          {unread > 0 && <span className="absolute top-0.5 right-0.5 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-accent px-0.5 text-[9px] font-bold text-white">{unread > 9 ? "9+" : unread}</span>}
+          {unread > 0 && <span className="absolute top-0.5 right-0.5 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-accent px-0.5 text-[11px] font-bold text-white">{unread > 9 ? "9+" : unread}</span>}
         </button>
       }
     >
       <div className="flex items-center justify-between border-b border-line px-3 py-2">
-        <span className="text-xs font-semibold">Notifications</span>
+        <span className="text-[13px] font-semibold">Notifications</span>
         <button
-          className="flex items-center gap-1 text-[11px] text-muted hover:text-fg"
+          className="flex items-center gap-1 text-[13px] text-muted hover:text-fg"
           onClick={() => run({ type: "notification.read", notificationId: null }, { quiet: true, onSuccess: () => setItems((x) => x?.map((n) => ({ ...n, read: true })) ?? null) })}
         >
           <CheckCheck className="size-3" /> Mark all read
@@ -123,7 +123,7 @@ function Notifications({ unread }: { unread: number }) {
         {items === null ? (
           <div className="space-y-2 p-3">{[0, 1, 2].map((i) => <div key={i} className="h-10 animate-pulse rounded bg-panel-3" />)}</div>
         ) : items.length === 0 ? (
-          <p className="px-3 py-8 text-center text-xs text-muted">You&apos;re all caught up.</p>
+          <p className="px-3 py-8 text-center text-[13px] text-muted">You&apos;re all caught up.</p>
         ) : (
           items.map((n) => (
             <Link
@@ -135,16 +135,16 @@ function Notifications({ unread }: { unread: number }) {
               <div className="flex items-start gap-2">
                 {!n.read && <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-info" />}
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-xs font-medium text-fg">{n.title}</p>
-                  {n.body && <p className="line-clamp-2 text-[11px] text-muted">{n.body}</p>}
-                  <p className="mt-0.5 text-[10px] text-faint"><Ago iso={n.createdAt} /></p>
+                  <p className="truncate text-[13px] font-medium text-fg">{n.title}</p>
+                  {n.body && <p className="line-clamp-2 text-[13px] text-muted">{n.body}</p>}
+                  <p className="mt-0.5 text-xs text-faint"><Ago iso={n.createdAt} /></p>
                 </div>
               </div>
             </Link>
           ))
         )}
       </div>
-      <Link href="/notifications" className="block px-3 py-2 text-center text-[11px] text-muted hover:text-fg">
+      <Link href="/notifications" className="block px-3 py-2 text-center text-[13px] text-muted hover:text-fg">
         All notifications & preferences
       </Link>
     </Popover>

@@ -32,7 +32,7 @@ export function ExperimentsClient({ experiments, metrics, tasks }: { experiments
       <div className="flex flex-wrap items-end gap-3">
         <div className="flex-1">
           <h1 className="text-xl font-semibold">Experiments & testing</h1>
-          <p className="text-xs text-muted">Every metric has a definition, unit and provenance. Records marked <Badge tone="warn">demo data</Badge> are synthetic demonstrations, not measured results.</p>
+          <p className="text-[13px] text-muted">Every metric has a definition, unit and provenance. Records marked <Badge tone="warn">demo data</Badge> are synthetic demonstrations, not measured results.</p>
         </div>
         {can("experiment.create") && (
           <Dialog open={open} onOpenChange={setOpen} title="Record an experiment" wide trigger={<Button variant="primary"><Plus /> New experiment</Button>}>
@@ -43,11 +43,11 @@ export function ExperimentsClient({ experiments, metrics, tasks }: { experiments
 
       {compared.length >= 2 && (
         <Panel>
-          <PanelHeader title={`Comparing ${compared.length} experiments`} icon={<GitCompare />} actions={<button onClick={() => setSel([])} className="text-[11px] text-muted hover:text-fg">Clear</button>} />
+          <PanelHeader title={`Comparing ${compared.length} experiments`} icon={<GitCompare />} actions={<button onClick={() => setSel([])} className="text-[13px] text-muted hover:text-fg">Clear</button>} />
           <div className="grid gap-4 p-3 lg:grid-cols-2">
             <div className="overflow-x-auto">
-              <table className="w-full text-xs">
-                <thead><tr className="text-left text-[10px] text-muted uppercase"><th className="py-1">Metric</th>{compared.map((e, i) => <th key={e.id} className="py-1" style={{ color: PALETTE[i % PALETTE.length] }}>{e.name.slice(0, 28)}</th>)}</tr></thead>
+              <table className="w-full text-[13px]">
+                <thead><tr className="text-left text-xs text-muted uppercase"><th className="py-1">Metric</th>{compared.map((e, i) => <th key={e.id} className="py-1" style={{ color: PALETTE[i % PALETTE.length] }}>{e.name.slice(0, 28)}</th>)}</tr></thead>
                 <tbody>
                   {metricKeys.map((k) => {
                     const d = def.get(k);
@@ -56,14 +56,14 @@ export function ExperimentsClient({ experiments, metrics, tasks }: { experiments
                     const best = nums.length ? (d?.higherIsBetter ? Math.max(...nums) : Math.min(...nums)) : null;
                     return (
                       <tr key={k} className="border-t border-line">
-                        <td className="py-1.5 pr-2"><div className="text-fg">{d?.name ?? k}</div><div className="text-[10px] text-faint">{d?.unit} · {d?.higherIsBetter ? "higher is better" : "lower is better"}</div></td>
+                        <td className="py-1.5 pr-2"><div className="text-fg">{d?.name ?? k}</div><div className="text-xs text-faint">{d?.unit} · {d?.higherIsBetter ? "higher is better" : "lower is better"}</div></td>
                         {values.map((v, i) => <td key={i} className={cn("py-1.5 font-mono", v === best && nums.length > 1 ? "text-ok" : "text-fg-2")}>{v ?? "—"}</td>)}
                       </tr>
                     );
                   })}
                 </tbody>
               </table>
-              {compared.some((e) => e.isDemo) && <p className="mt-2 text-[11px] text-warn">Includes synthetic demo records — do not draw engineering conclusions.</p>}
+              {compared.some((e) => e.isDemo) && <p className="mt-2 text-[13px] text-warn">Includes synthetic demo records — do not draw engineering conclusions.</p>}
             </div>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
@@ -76,20 +76,20 @@ export function ExperimentsClient({ experiments, metrics, tasks }: { experiments
                   {compared.map((e, i) => <Bar key={e.id} dataKey={e.name} fill={PALETTE[i % PALETTE.length]} radius={[3, 3, 0, 0]} />)}
                 </BarChart>
               </ResponsiveContainer>
-              <p className="text-center text-[10px] text-faint">Mixed units share one axis; read the table for exact values.</p>
+              <p className="text-center text-xs text-faint">Mixed units share one axis; read the table for exact values.</p>
             </div>
           </div>
         </Panel>
       )}
 
       <div className="flex gap-1">
-        <button onClick={() => setTrack("")} className={cn("rounded border px-2 py-0.5 text-[11px]", !track ? "border-info/50 text-info" : "border-line text-muted")}>All</button>
-        {[...new Set(experiments.map((e) => e.trackId))].map((t) => <button key={t} onClick={() => setTrack(t)} className={cn("rounded border px-2 py-0.5 font-mono text-[11px]", track === t ? "border-info/50 text-info" : "border-line text-muted")}>{t}</button>)}
+        <button onClick={() => setTrack("")} className={cn("rounded border px-2 py-0.5 text-[13px]", !track ? "border-info/50 text-info" : "border-line text-muted")}>All</button>
+        {[...new Set(experiments.map((e) => e.trackId))].map((t) => <button key={t} onClick={() => setTrack(t)} className={cn("rounded border px-2 py-0.5 font-mono text-[13px]", track === t ? "border-info/50 text-info" : "border-line text-muted")}>{t}</button>)}
       </div>
       <Panel>
         {shown.length === 0 ? <EmptyState icon={<FlaskConical />} title="No experiments yet" /> : (
-          <table className="w-full text-xs">
-            <thead><tr className="border-b border-line text-left text-[10px] tracking-wider text-muted uppercase"><th className="w-8 px-3 py-2" /><th className="py-2">Name</th><th className="py-2">Track</th><th className="py-2">Task</th><th className="py-2">Status</th><th className="py-2">Metrics</th><th className="py-2 pr-3">Updated</th></tr></thead>
+          <table className="w-full text-[13px]">
+            <thead><tr className="border-b border-line text-left text-xs tracking-wider text-muted uppercase"><th className="w-8 px-3 py-2" /><th className="py-2">Name</th><th className="py-2">Track</th><th className="py-2">Task</th><th className="py-2">Status</th><th className="py-2">Metrics</th><th className="py-2 pr-3">Updated</th></tr></thead>
             <tbody>
               {shown.map((e) => (
                 <tr key={e.id} className="border-b border-line last:border-0 hover:bg-panel-2">
@@ -106,7 +106,7 @@ export function ExperimentsClient({ experiments, metrics, tasks }: { experiments
           </table>
         )}
       </Panel>
-      <p className="text-[11px] text-faint">Select two or more experiments to compare.</p>
+      <p className="text-[13px] text-faint">Select two or more experiments to compare.</p>
     </div>
   );
 }

@@ -19,7 +19,7 @@ export function ListView({ tasks }: { tasks: TaskSummary[] }) {
     <div className="p-3">
       <div className="divide-y divide-line overflow-hidden rounded-lg border border-line bg-panel">
         {sorted.map((t) => (
-          <div key={t.id} className="flex items-center gap-3 px-3 py-1.5 text-xs hover:bg-panel-2">
+          <div key={t.id} className="flex items-center gap-3 px-3 py-1.5 text-[13px] hover:bg-panel-2">
             <span className={cn("size-2 shrink-0 rounded-full", STATUS_DOT[t.status])} title={t.status} />
             <TrackChip trackId={t.trackId} />
             <TaskLink k={t.key} title={t.title} className="min-w-0 flex-1" />
@@ -78,29 +78,29 @@ export function CalendarView({ tasks }: { tasks: TaskSummary[] }) {
     <div className="p-3">
       <div className="mb-2 flex items-center gap-2">
         <Button size="icon" variant="ghost" onClick={() => setMonth(addMonths(month, -1))} aria-label="Previous month"><ChevronLeft /></Button>
-        <h2 className="w-36 text-center text-sm font-semibold">{format(month, "MMMM yyyy")}</h2>
+        <h2 className="w-36 text-center text-[15px] font-semibold">{format(month, "MMMM yyyy")}</h2>
         <Button size="icon" variant="ghost" onClick={() => setMonth(addMonths(month, 1))} aria-label="Next month"><ChevronRight /></Button>
         <Button size="xs" variant="ghost" onClick={() => setMonth(startOfMonth(new Date()))}>Today</Button>
-        <span className="ml-auto text-[11px] text-muted">Dates: explicit due date → sprint end → milestone target. {unscheduled} unscheduled.</span>
+        <span className="ml-auto text-[13px] text-muted">Dates: explicit due date → sprint end → milestone target. {unscheduled} unscheduled.</span>
       </div>
       <div className="grid grid-cols-7 overflow-hidden rounded-lg border border-line bg-line gap-px">
         {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-          <div key={d} className="bg-panel-2 px-2 py-1 text-[10px] font-semibold text-muted uppercase">{d}</div>
+          <div key={d} className="bg-panel-2 px-2 py-1 text-xs font-semibold text-muted uppercase">{d}</div>
         ))}
         {days.map((d) => {
           const items = byDay.get(format(d, "yyyy-MM-dd")) ?? [];
           return (
             <div key={d.toISOString()} className={cn("min-h-[96px] bg-panel p-1", !isSameMonth(d, month) && "bg-bg opacity-60")}>
-              <div className={cn("mb-1 text-right font-mono text-[10px]", isToday(d) ? "font-bold text-accent" : "text-faint")}>{format(d, "d")}</div>
+              <div className={cn("mb-1 text-right font-mono text-xs", isToday(d) ? "font-bold text-accent" : "text-faint")}>{format(d, "d")}</div>
               <div className="space-y-0.5">
                 {items.slice(0, 4).map(({ t, source }) => (
-                  <Link key={t.id} href={`/tasks/${t.key}`} title={`${t.key} ${t.title} (${source})`} className={cn("flex items-center gap-1 truncate rounded px-1 py-0.5 text-[10px] hover:bg-panel-3", source !== "due date" && "opacity-75")}>
+                  <Link key={t.id} href={`/tasks/${t.key}`} title={`${t.key} ${t.title} (${source})`} className={cn("flex items-center gap-1 truncate rounded px-1 py-0.5 text-xs hover:bg-panel-3", source !== "due date" && "opacity-75")}>
                     <span className={cn("size-1.5 shrink-0 rounded-full", STATUS_DOT[t.status])} />
                     <span className="font-mono text-muted">{t.key}</span>
                     <span className="truncate text-fg-2">{t.title}</span>
                   </Link>
                 ))}
-                {items.length > 4 && <div className="px-1 text-[10px] text-muted">+{items.length - 4} more</div>}
+                {items.length > 4 && <div className="px-1 text-xs text-muted">+{items.length - 4} more</div>}
               </div>
             </div>
           );
@@ -131,7 +131,7 @@ export function TimelineView({ tasks }: { tasks: TaskSummary[] }) {
         <div className="min-w-[900px]">
           <div className="relative ml-[280px] h-6 border-b border-line">
             {months.map((m) => (
-              <span key={m.toISOString()} className="absolute top-1 border-l border-line pl-1 text-[10px] text-muted" style={{ left: x(m < min ? min : m) }}>{format(m, "MMM yyyy")}</span>
+              <span key={m.toISOString()} className="absolute top-1 border-l border-line pl-1 text-xs text-muted" style={{ left: x(m < min ? min : m) }}>{format(m, "MMM yyyy")}</span>
             ))}
             <span className="absolute top-0 bottom-0 w-px bg-accent" style={{ left: x(today) }} title="Today" />
           </div>
@@ -140,7 +140,7 @@ export function TimelineView({ tasks }: { tasks: TaskSummary[] }) {
             const color = track.get(t.trackId)?.color;
             return (
               <div key={t.id} className="flex items-center border-b border-line last:border-0 hover:bg-panel-2">
-                <div className="flex w-[280px] shrink-0 items-center gap-2 px-2 py-1 text-xs">
+                <div className="flex w-[280px] shrink-0 items-center gap-2 px-2 py-1 text-[13px]">
                   <TaskLink k={t.key} title={t.title} />
                 </div>
                 <div className="relative h-7 flex-1">
@@ -154,7 +154,7 @@ export function TimelineView({ tasks }: { tasks: TaskSummary[] }) {
           })}
         </div>
       </div>
-      <p className="mt-2 text-[11px] text-muted">Bars show planning windows derived from due dates, sprints or milestones (proposed dates). The darker portion is remaining checklist work.</p>
+      <p className="mt-2 text-[13px] text-muted">Bars show planning windows derived from due dates, sprints or milestones (proposed dates). The darker portion is remaining checklist work.</p>
     </div>
   );
 }
@@ -174,9 +174,9 @@ export function GroupedView({ tasks, by }: { tasks: TaskSummary[]; by: "assignee
     <div className="flex gap-2 overflow-x-auto p-3">
       {groups.filter((g) => g.tasks.length || by === "track").map((g) => (
         <section key={g.id} className="w-[280px] shrink-0 rounded-lg bg-panel/60">
-          <header className="flex items-center gap-2 px-2.5 pt-2.5 pb-2 text-xs font-semibold">
+          <header className="flex items-center gap-2 px-2.5 pt-2.5 pb-2 text-[13px] font-semibold">
             {g.header}
-            <span className="ml-auto font-mono text-[10px] text-muted">{g.tasks.length}</span>
+            <span className="ml-auto font-mono text-xs text-muted">{g.tasks.length}</span>
           </header>
           <div className="flex flex-col gap-2 px-2 pb-2">
             {g.tasks.map((t) => (

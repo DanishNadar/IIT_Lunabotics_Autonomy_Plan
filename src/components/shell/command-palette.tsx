@@ -92,26 +92,26 @@ export function CommandPalette() {
           <Command shouldFilter={false} label="Global search">
             <div className="flex items-center gap-2 border-b border-line px-3">
               {loading ? <Loader2 className="size-4 animate-spin text-muted" /> : <Search className="size-4 text-muted" />}
-              <Command.Input value={q} onValueChange={setQ} placeholder="Search by task ID, title, code reference, doc, member…" className="h-11 flex-1 bg-transparent text-sm text-fg outline-none placeholder:text-faint" autoFocus />
+              <Command.Input value={q} onValueChange={setQ} placeholder="Search by task ID, title, code reference, doc, member…" className="h-11 flex-1 bg-transparent text-[15px] text-fg outline-none placeholder:text-faint" autoFocus />
             </div>
             <Command.List className="max-h-[60vh] overflow-y-auto p-1.5">
               {!q.trim() && (
-                <Command.Group heading="Jump to" className="text-[10px] text-faint [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1 [&_[cmdk-group-heading]]:uppercase">
+                <Command.Group heading="Jump to" className="text-xs text-faint [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1 [&_[cmdk-group-heading]]:uppercase">
                   {QUICK.map((x) => (
-                    <Command.Item key={x.href} value={x.href} onSelect={() => go(x.href)} className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-xs text-fg-2 data-[selected=true]:bg-panel-3 data-[selected=true]:text-fg">
+                    <Command.Item key={x.href} value={x.href} onSelect={() => go(x.href)} className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-[13px] text-fg-2 data-[selected=true]:bg-panel-3 data-[selected=true]:text-fg">
                       <Box className="size-3.5 text-muted" /> {x.label}
                     </Command.Item>
                   ))}
                 </Command.Group>
               )}
-              {q.trim() && !loading && hits.length === 0 && <Command.Empty className="px-3 py-8 text-center text-xs text-muted">No results for “{q}”.</Command.Empty>}
+              {q.trim() && !loading && hits.length === 0 && <Command.Empty className="px-3 py-8 text-center text-[13px] text-muted">No results for “{q}”.</Command.Empty>}
               {hits.map((h) => (
                 <Command.Item key={`${h.kind}-${h.id}`} value={`${h.kind}-${h.id}`} onSelect={() => go(h.href)} className="flex cursor-pointer items-start gap-2.5 rounded px-2 py-1.5 data-[selected=true]:bg-panel-3">
                   <span className="mt-0.5 text-muted [&_svg]:size-3.5">{ICON[h.kind]}</span>
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-xs font-medium text-fg">{h.title}</div>
-                    <div className="truncate text-[11px] text-muted">{h.subtitle}</div>
-                    {h.snippet && <div className="line-clamp-1 text-[11px] text-faint">{h.snippet}</div>}
+                    <div className="truncate text-[13px] font-medium text-fg">{h.title}</div>
+                    <div className="truncate text-[13px] text-muted">{h.subtitle}</div>
+                    {h.snippet && <div className="line-clamp-1 text-[13px] text-faint">{h.snippet}</div>}
                   </div>
                 </Command.Item>
               ))}
