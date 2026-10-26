@@ -22,7 +22,7 @@ export default function SetupPage() {
       </ul>
       <ol className="mt-6 list-decimal space-y-2 pl-5 text-sm text-fg-2">
         <li>Create a Supabase project. Apply <code>supabase/migrations/*</code>, then load <code>supabase/seed.sql</code>.</li>
-        <li>In Vercel → Project → Settings → Environment Variables, add the variables above and <code>ADMIN_EMAILS</code>.</li>
+        <li>In Vercel → Project → Settings → Environment Variables, add the variables above, <code>ADMIN_PASSWORD</code> and <code>SESSION_SECRET</code>.</li>
         <li>Redeploy. Vercel builds <code>NEXT_PUBLIC_</code> values into the app, so they take effect only after a new build.</li>
       </ol>
       <p className="mt-6 text-sm text-fg-2">See the README section “Deployment (Vercel)” for details.</p>

@@ -3,6 +3,18 @@ import { createHmac, randomBytes, scryptSync, timingSafeEqual, createHash } from
 import { env } from "./env";
 
 export const SESSION_COOKIE = "lacc_session";
+
+export const ADMIN_COOKIE = "lacc_admin";
+
+/** Ties admin sessions to the current password, so changing ADMIN_PASSWORD signs every admin out. */
+export const adminFingerprint = () => (env.adminPassword ? createHash("sha256").update(`admin:${env.adminPassword}`).digest("hex").slice(0, 16) : null);
+
+/** Constant-time check of the shared admin password (false when ADMIN_PASSWORD is unset). */
+export function isAdminPassword(input: string | null | undefined) {
+  if (!env.adminPassword || !input) return false;
+  const digest = (s: string) => createHash("sha256").update(s).digest();
+  return timingSafeEqual(digest(input), digest(env.adminPassword));
+}
 const MAX_AGE_S = 60 * 60 * 24 * 14;
 const DEV_SECRET = "dev-only-insecure-secret-change-me";
 

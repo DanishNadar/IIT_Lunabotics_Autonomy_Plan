@@ -182,6 +182,15 @@ export const commandSchema = z.discriminatedUnion("type", [
       })
       .partial(),
   }),
+  z.object({
+    type: z.literal("member.create"),
+    name: z.string().trim().min(2).max(80),
+    role: z.enum(ROLES).default("member"),
+    primaryTrackId: trackId.nullable().default(null),
+    leadTrackIds: z.array(trackId).default([]),
+    discordHandle: text(40).nullable().default(null),
+    githubUsername: z.string().trim().regex(/^[A-Za-z0-9-]{1,39}$/).nullable().default(null),
+  }),
   z.object({ type: z.literal("member.setRole"), memberId: id, role: z.enum(ROLES), leadTrackIds: z.array(trackId).default([]) }),
   z.object({ type: z.literal("member.setActive"), memberId: id, active: z.boolean() }),
   z.object({
@@ -941,6 +950,25 @@ export function handleCommand(ctx: Ctx, raw: unknown): Outcome {
       if (!db.members.some((m) => m.id === cmd.memberId)) throw new CommandError("Member not found.");
       ops.push({ op: "update", c: "members", id: cmd.memberId, patch: { ...cmd.patch, updatedAt: now } });
       return { ops, message: "Profile saved" };
+    }
+
+    case "member.create": {
+      allow("member.manage");
+      if (db.members.some((m) => m.active && m.name.toLowerCase() === cmd.name.toLowerCase())) throw new CommandError("A member with that name already exists.");
+      const memberId = ctx.newId();
+      const palette = ["#38bdf8", "#a78bfa", "#34d399", "#f59e0b", "#f472b6", "#22d3ee", "#84cc16", "#fb923c"];
+      const color = palette[[...memberId].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 0) % palette.length];
+      ops.push({
+        op: "insert",
+        c: "members",
+        row: {
+          id: memberId, name: cmd.name, email: "", passwordHash: null, role: cmd.role, isDemo: false, primaryTrackId: cmd.primaryTrackId, secondaryTrackId: null,
+          leadTrackIds: cmd.role === "track_lead" ? cmd.leadTrackIds : [], githubUsername: cmd.githubUsername, discordHandle: cmd.discordHandle, skills: [], experience: "new",
+          availabilityHours: 5, bio: "", avatarColor: color, active: true, createdAt: now, updatedAt: now,
+        } as never,
+      });
+      audit("member.create", "member", memberId, `added ${cmd.name} as ${cmd.role}`, `/team/${memberId}`);
+      return { ops, message: `${cmd.name} added` };
     }
 
     case "member.setRole": {

@@ -16,7 +16,7 @@ export async function syncGithubLinks(taskId: string): Promise<{ ok: true; messa
   const db = await store.snapshot();
   const task = db.tasks.find((t) => t.id === taskId);
   if (!task) return { ok: false, error: "Task not found." };
-  if (!actor || actor.role === "viewer") return { ok: false, error: "Sign in as a team member to sync." };
+  if (actor.role === "viewer") return { ok: false, error: "Unlock admin to sync GitHub status." };
   const links = db.githubLinks.filter((g) => g.taskId === taskId && (g.kind === "pr" || g.kind === "issue") && g.number);
   const ops: Op[] = [];
   const errors: string[] = [];

@@ -1,87 +1,88 @@
 import "server-only";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { cache } from "react";
 import type { Member } from "@/lib/domain/types";
-import { env, supabaseConfigured } from "./env";
-import { SESSION_COOKIE, verifySessionToken } from "./session";
+import { GUEST_ID } from "@/lib/guest";
+import { env } from "./env";
+import { ADMIN_COOKIE, SESSION_COOKIE, adminFingerprint, verifySessionToken } from "./session";
 import { getStore } from "./store";
-import { supabaseServerClient } from "./supabase-auth";
-
-export const authMode = () => (supabaseConfigured() ? ("supabase" as const) : ("local" as const));
-
-/** Resolves the signed-in member for this request, or null. */
-export const getActor = cache(async (): Promise<Member | null> => {
-  const store = getStore();
-  if (authMode() === "supabase") {
-    const sb = await supabaseServerClient();
-    const { data } = await sb.auth.getUser();
-    const user = data.user;
-    if (!user) return null;
-    const db = await store.snapshot();
-    const existing = db.members.find((m) => m.id === user.id);
-    if (existing) return existing.active ? existing : null;
-    return ensureProfile(user.id, user.email ?? "", (user.user_metadata?.full_name as string) || (user.user_metadata?.user_name as string) || user.email?.split("@")[0] || "New member", (user.user_metadata?.user_name as string) ?? null);
-  }
-  const token = (await cookies()).get(SESSION_COOKIE)?.value;
-  let memberId: string | null = null;
-  try {
-    memberId = verifySessionToken(token);
-  } catch {
-    return null;
-  }
-  if (!memberId) return null;
-  const db = await store.snapshot();
-  const m = db.members.find((x) => x.id === memberId);
-  if (!m || !m.active) return null;
-  if (m.isDemo && !env.demoAccounts) return null;
-  return m;
-});
-
-export async function requireActor(): Promise<Member> {
-  const actor = await getActor();
-  if (!actor) redirect("/login");
-  return actor;
-}
 
 /**
- * Creates a profile for a first-time Supabase user. Role comes from an accepted
- * invitation, ADMIN_EMAILS, or defaults to member.
+ * Everyone can read the workspace without an account. Visitors act as a read-only
+ * guest; entering the admin password grants the Administrator identity, which is the
+ * only way to add or change data (plus the labeled demo personas in local mode).
  */
-async function ensureProfile(id: string, email: string, name: string, github: string | null): Promise<Member> {
+export { GUEST_ID };
+export const ADMIN_MEMBER_ID = "00000000-0000-4000-8000-0000000000ad";
+
+const EPOCH = "2026-10-25T12:00:00.000Z";
+
+export const GUEST: Member = {
+  id: GUEST_ID,
+  name: "Guest",
+  email: "",
+  passwordHash: null,
+  role: "viewer",
+  isDemo: false,
+  primaryTrackId: null,
+  secondaryTrackId: null,
+  leadTrackIds: [],
+  githubUsername: null,
+  discordHandle: null,
+  skills: [],
+  experience: "new",
+  availabilityHours: 0,
+  bio: "",
+  avatarColor: "#475569",
+  active: true,
+  createdAt: EPOCH,
+  updatedAt: EPOCH,
+};
+
+export const isGuest = (m: Pick<Member, "id">) => m.id === GUEST_ID;
+
+/** Resolves who is making this request: the administrator, a local demo persona, or the guest. */
+export const getActor = cache(async (): Promise<Member> => {
+  const jar = await cookies();
+  let adminToken: string | null = null;
+  try {
+    adminToken = verifySessionToken(jar.get(ADMIN_COOKIE)?.value);
+  } catch {
+    // SESSION_SECRET missing in production: nobody can hold an admin session.
+  }
+  const fp = adminFingerprint();
+  if (fp && adminToken === `admin-${fp}`) return ensureAdminMember();
+
+  if (env.demoAccounts) {
+    let memberId: string | null = null;
+    try {
+      memberId = verifySessionToken(jar.get(SESSION_COOKIE)?.value);
+    } catch {
+      memberId = null;
+    }
+    if (memberId) {
+      const db = await getStore().snapshot();
+      const m = db.members.find((x) => x.id === memberId && x.isDemo && x.active);
+      if (m) return m;
+    }
+  }
+  return GUEST;
+});
+
+export const requireActor = getActor;
+
+/** The single Administrator record that admin-made changes are attributed to. */
+async function ensureAdminMember(): Promise<Member> {
   const store = getStore();
+  const existing = (await store.snapshot()).members.find((m) => m.id === ADMIN_MEMBER_ID);
+  if (existing) return { ...existing, role: "admin", active: true };
   return store.exclusive(async () => {
-    const db = await store.snapshot();
-    const found = db.members.find((m) => m.id === id);
+    const found = (await store.snapshot()).members.find((m) => m.id === ADMIN_MEMBER_ID);
     if (found) return found;
     const now = new Date().toISOString();
-    const invite = db.invitations.find((i) => i.email.toLowerCase() === email.toLowerCase() && !i.acceptedAt);
-    const role = env.adminEmails.includes(email.toLowerCase()) ? "admin" : invite?.role ?? "member";
-    const member: Member = {
-      id,
-      name,
-      email,
-      passwordHash: null,
-      role,
-      isDemo: false,
-      primaryTrackId: null,
-      secondaryTrackId: null,
-      leadTrackIds: invite?.leadTrackIds ?? [],
-      githubUsername: github,
-      discordHandle: null,
-      skills: [],
-      experience: "new",
-      availabilityHours: 5,
-      bio: "",
-      avatarColor: pickColor(id),
-      active: true,
-      createdAt: now,
-      updatedAt: now,
-    };
-    const ops: import("@/lib/domain/ops").Op[] = [{ op: "insert", c: "members", row: member as never }];
-    if (invite) ops.push({ op: "update", c: "invitations", id: invite.id, patch: { acceptedAt: now } });
-    await store.apply(ops);
-    return member;
+    const admin: Member = { ...GUEST, id: ADMIN_MEMBER_ID, name: "Administrator", role: "admin", avatarColor: "#ef4444", bio: "Signed in with the admin password.", createdAt: now, updatedAt: now };
+    await store.apply([{ op: "insert", c: "members", row: admin as never }]);
+    return admin;
   });
 }
 

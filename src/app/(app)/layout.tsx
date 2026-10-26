@@ -28,7 +28,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         demoMode: env.demoAccounts && store.kind !== "supabase",
       }}
     >
-      <AppShell counts={{ unread, myActive, reviewQueue }} realtime={store.kind === "supabase" ? { url: env.supabaseUrl, anonKey: env.supabaseAnonKey } : null}>
+      <AppShell counts={{ unread, myActive, reviewQueue }} realtime={null}>
         {children}
       </AppShell>
     </WorkspaceProvider>

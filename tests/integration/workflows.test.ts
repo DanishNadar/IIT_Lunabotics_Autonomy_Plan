@@ -220,3 +220,17 @@ describe("archived tasks and external dependencies", () => {
     expect(h.db.notifications.some((n) => n.memberId === MEMBER_B && n.kind === "blocker_new")).toBe(true);
   });
 });
+
+describe("team members without accounts", () => {
+  it("only administrators add members, who can then be assigned", () => {
+    const h = new Harness();
+    expect(() => h.run(MEMBER_A, { type: "member.create", name: "Taylor Example" })).toThrow();
+    expect(() => h.run(VIEWER, { type: "member.create", name: "Taylor Example" })).toThrow();
+    h.run(ADMIN, { type: "member.create", name: "Taylor Example", role: "member", primaryTrackId: "SF", discordHandle: "taylor" });
+    const m = h.db.members.find((x) => x.name === "Taylor Example")!;
+    expect(m).toMatchObject({ role: "member", primaryTrackId: "SF", isDemo: false, email: "", passwordHash: null, active: true });
+    expect(() => h.run(ADMIN, { type: "member.create", name: "taylor example" })).toThrow(/already exists/);
+    h.run(ADMIN, { type: "task.assign", taskId: h.task("SF-01").id, memberId: m.id, role: "owner", responsibility: "Owner" });
+    expect(h.db.assignments.some((a) => a.memberId === m.id)).toBe(true);
+  });
+});

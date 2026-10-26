@@ -28,6 +28,7 @@ import { useWorkspace } from "../workspace";
 import { CommandPalette } from "./command-palette";
 import { LiveRefresh } from "./live-refresh";
 import { Topbar } from "./topbar";
+import { isGuestId } from "@/lib/guest";
 
 type NavItem = { href: string; label: string; icon: ReactNode; count?: number };
 
@@ -63,7 +64,7 @@ export function AppShell({ children, counts, realtime }: { children: ReactNode; 
 
   const nav: NavItem[] = [
     { href: "/", label: "Overview", icon: <LayoutDashboard /> },
-    { href: "/my-work", label: "My Tasks", icon: <Inbox />, count: counts.myActive },
+    ...(isGuestId(actor.id) ? [] : [{ href: "/my-work", label: "My Tasks", icon: <Inbox />, count: counts.myActive }]),
     { href: "/board", label: "All Tasks", icon: <KanbanSquare /> },
   ];
   const categories: NavItem[] = tracks.map((t) => ({ href: `/tracks/${t.id}`, label: t.shortName, icon: <span className="flex size-4 items-center justify-center text-[13px] leading-none">{t.emoji}</span> }));

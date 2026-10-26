@@ -2,6 +2,8 @@ import { nextIncomplete } from "@/lib/domain/checklist";
 import { isActive } from "@/lib/domain/status";
 import { summarizeTasks } from "@/lib/domain/views";
 import { memberWorkload } from "@/lib/domain/workload";
+import { redirect } from "next/navigation";
+import { isGuest } from "@/lib/server/auth";
 import { loadContext } from "@/lib/server/data";
 import { MyWorkClient } from "./my-work-client";
 
@@ -9,6 +11,7 @@ export const metadata = { title: "My Tasks" };
 
 export default async function MyWorkPage() {
   const { db, actor } = await loadContext();
+  if (isGuest(actor)) redirect("/board");
   const mineIds = new Set(db.assignments.filter((a) => a.memberId === actor.id).map((a) => a.taskId));
   const summaries = summarizeTasks(db);
   const mine = summaries.filter((t) => mineIds.has(t.id));

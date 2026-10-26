@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
 import { logout } from "@/app/actions/auth";
 import { ROLE_LABEL, type Notification } from "@/lib/domain/types";
+import { isGuestId } from "@/lib/guest";
 import { cn } from "@/lib/utils";
 import { useCommand } from "../use-command";
 import { Menu, MenuItem, MenuLabel, MenuSeparator, Popover } from "../ui/overlay";
@@ -18,6 +19,7 @@ export function openPalette() {
 
 export function Topbar({ unread, reviewQueue, leading }: { unread: number; reviewQueue: number; leading: ReactNode }) {
   const { actor } = useWorkspace();
+  const guest = isGuestId(actor.id);
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   useEffect(() => setTheme(document.documentElement.dataset.theme === "light" ? "light" : "dark"), []);
   const toggleTheme = () => {
@@ -49,10 +51,11 @@ export function Topbar({ unread, reviewQueue, leading }: { unread: number; revie
             </Badge>
           </Link>
         )}
-        <Notifications unread={unread} />
+        {!guest && <Notifications unread={unread} />}
         <button onClick={toggleTheme} className="rounded p-1.5 text-muted hover:bg-panel-3 hover:text-fg" aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}>
           {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
         </button>
+        {!guest && (
         <Menu
           trigger={
             <button className="flex items-center gap-2 rounded-md py-1 pr-1 pl-1.5 hover:bg-panel-3" aria-label="Account menu">
@@ -77,9 +80,10 @@ export function Topbar({ unread, reviewQueue, leading }: { unread: number; revie
           </Link>
           <MenuSeparator />
           <MenuItem onSelect={() => void logout()}>
-            <LogOut /> Sign out
+            <LogOut /> {actor.role === "admin" ? "Lock admin" : "Sign out"}
           </MenuItem>
         </Menu>
+        )}
       </div>
     </header>
   );

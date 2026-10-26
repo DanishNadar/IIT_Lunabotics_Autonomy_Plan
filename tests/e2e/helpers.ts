@@ -2,9 +2,9 @@ import { expect, type Locator, type Page } from "@playwright/test";
 
 export async function loginAs(page: Page, name: string) {
   await page.context().clearCookies();
-  await page.goto("/login");
+  await page.goto("/admin");
   await page.getByRole("button", { name: new RegExp(name) }).click();
-  await page.waitForURL((u) => !u.pathname.startsWith("/login"));
+  await page.waitForURL((u) => u.pathname === "/");
 }
 
 export async function selectOptionContaining(select: Locator, text: string) {

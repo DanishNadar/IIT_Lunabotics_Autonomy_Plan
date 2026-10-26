@@ -24,6 +24,6 @@ export default defineConfig({
     url: `http://localhost:${PORT}/api/health`,
     reuseExistingServer: false,
     timeout: 120_000,
-    env: { DATA_FILE: ".data/e2e-db.json", SESSION_SECRET: "e2e-test-secret-not-for-production", DEMO_ACCOUNTS: "true" },
+    env: { DATA_FILE: ".data/e2e-db.json", SESSION_SECRET: "e2e-test-secret-not-for-production", DEMO_ACCOUNTS: "true", ADMIN_PASSWORD: "e2e-admin-password-not-real" },
   },
 });

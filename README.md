@@ -2,7 +2,9 @@
 
 Engineering platform for the **Illinois Tech Robotics — NASA Lunabotics 2027 Autonomy Team**: task management, guided technical assignments, learning paths, sprint planning, dependency and ROS architecture graphs, experiments, a knowledge base, and an evidence-based mission-readiness dashboard.
 
-> All seeded member accounts are **labeled demo identities**. No real people, progress, or measured results are seeded. The two seeded experiments are marked as synthetic demonstrations.
+> **Anyone can view everything without an account.** There is no login screen. The unlisted **`/admin`** page asks for the admin password and unlocks adding and changing tasks, members, resources and settings across the board. Team members are records the admin creates; they don't log in.
+>
+> All seeded member profiles are **labeled demo identities**. No real people, progress, or measured results are seeded. The two seeded experiments are marked as synthetic demonstrations.
 
 ## Team structure
 
@@ -28,7 +30,7 @@ cp .env.example .env.local     # optional in development
 npm run dev                    # http://localhost:3000
 ```
 
-Sign in with a demo account (Administrator, Autonomy Lead, Track Lead (SF), Members A–C, Viewer) or register a real account. In local mode data is saved **server-side** to `.data/db.json` and is shared by everyone using that running server. It is not browser-only storage, but it is also not suitable for serverless hosting (see Deployment).
+Open the board without signing in. To edit, open `/admin` and enter `ADMIN_PASSWORD` from `.env.local`. In local mode that page also lists labeled demo personas (Autonomy Lead, Track Lead (SF), Members A–C, Viewer) for trying role-based workflows. In local mode data is saved **server-side** to `.data/db.json` and is shared by everyone using that running server. It is not browser-only storage, but it is also not suitable for serverless hosting (see Deployment).
 
 Reset local data to the seed: `npm run db:reset:local` (or **Administration → Reset local data**).
 
@@ -85,12 +87,8 @@ How to run it:
    npm run db:seed:sql                    # regenerates supabase/seed.sql from the TS seed
    psql "$DATABASE_URL" -f supabase/seed.sql
    ```
-4. Set `ADMIN_EMAILS` to the first administrator's email, then sign up. Profiles are created on first sign-in. Role comes from a pending invitation, `ADMIN_EMAILS`, or defaults to member.
-5. **Security model:** the browser never receives the service-role key. Writes go through server actions that authorize first and then write with the service role. RLS grants authenticated active members read access to shared data and owner-only access to notifications, preferences and saved views. It grants no write policies, so direct client writes are denied.
-
-### GitHub OAuth
-
-Supabase → Authentication → Providers → GitHub. Create a GitHub OAuth App with callback `https://<project>.supabase.co/auth/v1/callback` and requested scopes `read:user user:email`. Add your site URL plus `/auth/callback` to Supabase redirect URLs. Set `NEXT_PUBLIC_GITHUB_OAUTH_ENABLED=true`.
+4. Set `ADMIN_PASSWORD` and `SESSION_SECRET`. Supabase Auth is not used: there are no user accounts.
+5. **Security model:** the browser never receives the service-role key and never queries tables directly. Every page is rendered on the server, which reads with the service role, so the board is public to read. Every write is a server action that requires the admin session (an HTTP-only cookie signed with `SESSION_SECRET` and tied to the current `ADMIN_PASSWORD`). RLS grants anonymous clients nothing, so the anon key cannot read or write tables. Wrong admin passwords are throttled per IP.
 
 ### GitHub integration
 
@@ -100,9 +98,9 @@ Supabase → Authentication → Providers → GitHub. Create a GitHub OAuth App 
 - Branch convention: `feature/<TASK-ID>-<slug>`. PR title convention: `[TASK-ID] Summary`. Both are shown on each task.
 - A merged PR **never** completes a task. Completion requires the Definition of Done plus an approving review.
 
-### Email invitations
+### Team members
 
-Administration → Invite. In Supabase mode this sends a Supabase invite email. In local mode it shows a one-time link; only the token hash is stored.
+Administration → **Add a team member** creates a member record (name, role, category, optional Discord/GitHub) for assignments. Members don't have logins; the admin makes changes on their behalf.
 
 ### Discord (optional)
 
@@ -111,7 +109,7 @@ Set `DISCORD_WEBHOOK_URL` to post team-level events only: new blockers, review r
 ## Deployment (Vercel)
 
 1. Push the repo to GitHub and import it in Vercel (**Add New → Project**). `vercel.json` sets the Next.js framework, `npm ci` and `npm run build`. Node ≥ 20.9 is declared in `package.json`.
-2. Finish **Supabase setup** above first: apply both SQL migrations, then load `supabase/seed.sql`.
+2. Finish **Supabase setup** above first: apply all SQL migrations in `supabase/migrations/` in filename order, then load `supabase/seed.sql`.
 3. In **Project → Settings → Environment Variables**, add these for Production (and Preview if previews should work):
 
    | Variable | Required | Notes |
@@ -119,19 +117,16 @@ Set `DISCORD_WEBHOOK_URL` to post team-level events only: new blockers, review r
    | `NEXT_PUBLIC_SUPABASE_URL` | yes | |
    | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | yes | |
    | `SUPABASE_SERVICE_ROLE_KEY` | yes | Server only. Never prefix with `NEXT_PUBLIC_` |
-   | `ADMIN_EMAILS` | yes | First administrator(s) |
-   | `SITE_URL` | for custom domains | Defaults to Vercel's production domain |
+   | `ADMIN_PASSWORD` | yes | Unlocks editing. Keep it out of the repo; changing it signs every admin out |
+   | `SESSION_SECRET` | yes | Long random string that signs the admin cookie (`openssl rand -base64 48`) |
    | `GITHUB_TOKEN` | optional | Fine-grained, read-only |
-   | `NEXT_PUBLIC_GITHUB_OAUTH_ENABLED` | optional | `true` after configuring the provider |
    | `DISCORD_WEBHOOK_URL` | optional | |
 
-   `SESSION_SECRET`, `DATA_FILE` and `DEMO_ACCOUNTS` apply to local mode only. Demo accounts are off once Supabase is configured.
-4. In Supabase → Authentication → URL Configuration, set **Site URL** to the production URL. Add `https://<your-domain>/auth/callback` to the redirect URLs, plus `https://*-<team>.vercel.app/auth/callback` if you use previews.
-5. Deploy, then open `/api/health`. It should return `{"ok":true,"store":"supabase"}`.
+   `DATA_FILE` and `DEMO_ACCOUNTS` apply to local mode only. Demo personas are off once Supabase is configured.
+4. Deploy, then open `/api/health`. It should return `{"ok":true,"store":"supabase"}`.
 
 **The local file store never runs on Vercel.** Vercel's filesystem is read-only and per-instance, so the app refuses to start a file store there. Without the Supabase variables, every page fails, and `/api/health` returns 503 with the missing configuration named. This replaces silently losing or splitting data.
 
-Auth emails, GitHub OAuth and invite links use `SITE_URL`, else the Vercel production domain (in production), else the request origin. An invite created from a preview deployment therefore still points at the real site.
 
 ## Testing
 
@@ -145,7 +140,7 @@ npm run test:e2e       # Playwright against `next start` with an isolated, resee
 
 - **Unit tests** cover status transitions, authorization, assignment rules, checklist completion, dependency cycle prevention, review rules, readiness computation, resource validation, sprint calculations, seed integrity, the five-category structure, the Discord summary format and the v1 → v2 migration. Migration tests check convergence with a fresh install, idempotency, progress preservation, no duplicate keys during the operation sequence, and the file-store backup.
 - **Integration tests** run real commands against the seeded database: task creation and editing, claiming, assignment, checklists, resources, deliverables, review request, approval and changes requested, blockers, sprint start/close with rollover, archiving/restoring externally owned tasks, and external dependency updates.
-- **E2E tests** cover authentication (demo, register, password, viewer read-only), lead assignment, member execution, the full review workflow, board filtering, the dependency graph, search, navigation, track-lead scope, legacy-key redirects, Discord channel filtering, archived tasks, Copy for Discord, and external team interfaces.
+- **E2E tests** cover public read-only access, the admin password (wrong and right), adding a member, local demo personas, lead assignment, member execution, the full review workflow, board filtering, the dependency graph, search, navigation, track-lead scope, legacy-key redirects, Discord channel filtering, archived tasks, Copy for Discord, and external team interfaces.
 
 The SQL migrations, `scripts/migrate-data.ts --apply` against Supabase, and the Supabase adapter have not been run against a live Supabase instance yet. Verify them in a staging project first.
 
@@ -153,11 +148,13 @@ The SQL migrations, `scripts/migrate-data.ts --apply` against Supabase, and the 
 
 | Action | Admin | Autonomy Lead | Track Lead | Member | Viewer |
 |---|---|---|---|---|---|
-| Members, roles, settings, invitations | ✓ | | | | |
+| Members, roles, settings | ✓ | | | | |
 | Sprints, milestones, resource verification, readiness flag | ✓ | ✓ | | | |
 | Create/edit/assign/review/archive tasks, dependencies, external dependency status | ✓ | ✓ | own tracks | | |
 | Update assigned tasks (checklist, evidence, PRs, blockers, request review) | ✓ | ✓ | own tracks | assigned | |
 | Claim/request tasks, comment, suggest resources, edit docs, record experiments | ✓ | ✓ | ✓ | ✓ | |
 | Read everything, learning progress | ✓ | ✓ | ✓ | ✓ | ✓ |
+
+**Visitors without the admin password are viewers.** The admin password gives the Admin column. The other roles apply to member records and to the local demo personas.
 
 When a task requires independent review, nobody assigned to it can approve it, including leads.

@@ -3,151 +3,71 @@
 import { randomUUID } from "node:crypto";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { z } from "zod";
-import { authorize } from "@/lib/domain/permissions";
-import { ROLES, TRACK_IDS, type Member } from "@/lib/domain/types";
-import { authMode, getActor, pickColor } from "@/lib/server/auth";
-import { appOrigin, env } from "@/lib/server/env";
-import { SESSION_COOKIE, createSessionToken, hashPassword, hashToken, newInviteToken, sessionCookieOptions, verifyPassword } from "@/lib/server/session";
+import { ADMIN_MEMBER_ID } from "@/lib/server/auth";
+import { env } from "@/lib/server/env";
+import { ADMIN_COOKIE, SESSION_COOKIE, adminFingerprint, createSessionToken, isAdminPassword, sessionCookieOptions } from "@/lib/server/session";
 import { getStore } from "@/lib/server/store";
-import { supabaseServerClient } from "@/lib/server/supabase-auth";
 
-export type AuthResult = { ok: false; error: string } | { ok: true; link?: string };
+export type AuthResult = { ok: false; error: string } | { ok: true };
 
-async function setSession(memberId: string) {
-  (await cookies()).set(SESSION_COOKIE, createSessionToken(memberId), sessionCookieOptions);
+// Best-effort brute-force brake (per server instance): 5 wrong passwords per IP per 10 minutes.
+const WINDOW_MS = 10 * 60 * 1000;
+const MAX_FAILURES = 5;
+const failures = new Map<string, number[]>();
+
+async function clientKey() {
+  const h = await headers();
+  return h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip") || "local";
 }
 
+export async function adminLogin(_: AuthResult | null, form: FormData): Promise<AuthResult> {
+  if (!env.adminPassword) return { ok: false, error: "Admin access is not configured. Set ADMIN_PASSWORD on the server." };
+  const key = await clientKey();
+  const now = Date.now();
+  const recent = (failures.get(key) ?? []).filter((t) => now - t < WINDOW_MS);
+  if (recent.length >= MAX_FAILURES) return { ok: false, error: "Too many wrong attempts. Try again in a few minutes." };
+
+  const password = form.get("password");
+  if (typeof password !== "string" || !isAdminPassword(password)) {
+    failures.set(key, [...recent, now]);
+    await new Promise((r) => setTimeout(r, 400));
+    return { ok: false, error: "Admin password is incorrect." };
+  }
+  failures.delete(key);
+  try {
+    const jar = await cookies();
+    jar.set(ADMIN_COOKIE, createSessionToken(`admin-${adminFingerprint()}`), sessionCookieOptions);
+    jar.delete(SESSION_COOKIE);
+  } catch (e) {
+    return { ok: false, error: (e as Error).message };
+  }
+  const store = getStore();
+  const adminExists = (await store.snapshot()).members.some((m) => m.id === ADMIN_MEMBER_ID);
+  await store.apply([
+    { op: "insert", c: "auditEvents", row: { id: randomUUID(), actorId: adminExists ? ADMIN_MEMBER_ID : null, action: "admin.signin", entity: "member", entityId: ADMIN_MEMBER_ID, summary: "Administrator signed in", href: "/admin", createdAt: new Date().toISOString() } },
+  ]);
+  redirect("/admin");
+}
+
+/** Local/demo mode only: act as one of the clearly labeled demo personas. */
 export async function loginAsDemo(memberId: string): Promise<AuthResult> {
-  if (authMode() !== "local" || !env.demoAccounts) return { ok: false, error: "Demo accounts are disabled on this deployment." };
+  if (!env.demoAccounts) return { ok: false, error: "Demo accounts are disabled on this deployment." };
   const db = await getStore().snapshot();
   const m = db.members.find((x) => x.id === memberId && x.isDemo && x.active);
   if (!m) return { ok: false, error: "Demo account not found." };
   try {
-    await setSession(m.id);
+    const jar = await cookies();
+    jar.set(SESSION_COOKIE, createSessionToken(m.id), sessionCookieOptions);
+    jar.delete(ADMIN_COOKIE);
   } catch (e) {
     return { ok: false, error: (e as Error).message };
   }
   redirect("/");
-}
-
-const credentials = z.object({ email: z.string().trim().toLowerCase().email(), password: z.string().min(8, "Password must be at least 8 characters").max(200) });
-
-export async function loginWithPassword(_: AuthResult | null, form: FormData): Promise<AuthResult> {
-  const parsed = credentials.safeParse({ email: form.get("email"), password: form.get("password") });
-  if (!parsed.success) return { ok: false, error: parsed.error.issues[0].message };
-  const { email, password } = parsed.data;
-  if (authMode() === "supabase") {
-    const sb = await supabaseServerClient();
-    const { error } = await sb.auth.signInWithPassword({ email, password });
-    if (error) return { ok: false, error: error.message };
-    redirect("/");
-  }
-  const db = await getStore().snapshot();
-  const m = db.members.find((x) => x.email.toLowerCase() === email && !x.isDemo);
-  if (!m || !verifyPassword(password, m.passwordHash)) return { ok: false, error: "Email or password is incorrect." };
-  if (!m.active) return { ok: false, error: "This account has been deactivated." };
-  try {
-    await setSession(m.id);
-  } catch (e) {
-    return { ok: false, error: (e as Error).message };
-  }
-  redirect("/");
-}
-
-const registration = credentials.extend({ name: z.string().trim().min(2).max(80), invite: z.string().optional() });
-
-export async function register(_: AuthResult | null, form: FormData): Promise<AuthResult> {
-  const parsed = registration.safeParse({ email: form.get("email"), password: form.get("password"), name: form.get("name"), invite: form.get("invite") || undefined });
-  if (!parsed.success) return { ok: false, error: parsed.error.issues[0].message };
-  const { email, password, name, invite } = parsed.data;
-  const store = getStore();
-
-  if (authMode() === "supabase") {
-    const sb = await supabaseServerClient();
-    const origin = appOrigin((await headers()).get("origin"));
-    const { error } = await sb.auth.signUp({ email, password, options: { data: { full_name: name }, emailRedirectTo: `${origin}/auth/callback` } });
-    if (error) return { ok: false, error: error.message };
-    return { ok: true };
-  }
-
-  const result = await store.exclusive(async () => {
-    const db = await store.snapshot();
-    if (db.members.some((m) => m.email.toLowerCase() === email)) return { ok: false as const, error: "An account with that email already exists." };
-    const inv = invite ? db.invitations.find((i) => i.tokenHash === hashToken(invite) && !i.acceptedAt) : undefined;
-    if (invite && !inv) return { ok: false as const, error: "Invitation link is invalid or already used." };
-    if (inv && inv.email.toLowerCase() !== email) return { ok: false as const, error: "Use the email address the invitation was sent to." };
-    if (!inv && !db.settings[0]?.allowSelfRegistration) return { ok: false as const, error: "Registration requires an invitation." };
-    const hasRealAdmin = db.members.some((m) => !m.isDemo && m.role === "admin");
-    // Bootstrap: ADMIN_EMAILS, otherwise the first real account becomes administrator.
-    const role = env.adminEmails.includes(email) || (!env.adminEmails.length && !hasRealAdmin) ? "admin" : inv?.role ?? "member";
-    const now = new Date().toISOString();
-    const id = randomUUID();
-    const member: Member = {
-      id, name, email, passwordHash: hashPassword(password), role, isDemo: false, primaryTrackId: null, secondaryTrackId: null,
-      leadTrackIds: inv?.leadTrackIds ?? [], githubUsername: null, discordHandle: null, skills: [], experience: "new",
-      availabilityHours: 5, bio: "", avatarColor: pickColor(id), active: true, createdAt: now, updatedAt: now,
-    };
-    const ops: import("@/lib/domain/ops").Op[] = [
-      { op: "insert", c: "members", row: member as never },
-      { op: "insert", c: "auditEvents", row: { id: randomUUID(), actorId: id, action: "member.register", entity: "member", entityId: id, summary: `${name} joined as ${role}`, href: `/team/${id}`, createdAt: now } },
-    ];
-    if (inv) ops.push({ op: "update", c: "invitations", id: inv.id, patch: { acceptedAt: now } });
-    await store.apply(ops);
-    return { ok: true as const, id };
-  });
-  if (!result.ok) return result;
-  try {
-    await setSession(result.id);
-  } catch (e) {
-    return { ok: false, error: (e as Error).message };
-  }
-  redirect("/my-work");
-}
-
-export async function signInWithGithub(): Promise<AuthResult> {
-  if (authMode() !== "supabase" || !env.githubOAuthEnabled) return { ok: false, error: "GitHub sign-in is not configured." };
-  const sb = await supabaseServerClient();
-  const origin = appOrigin((await headers()).get("origin"));
-  const { data, error } = await sb.auth.signInWithOAuth({ provider: "github", options: { redirectTo: `${origin}/auth/callback`, scopes: "read:user user:email" } });
-  if (error || !data.url) return { ok: false, error: error?.message ?? "Could not start GitHub sign-in." };
-  redirect(data.url);
 }
 
 export async function logout() {
-  if (authMode() === "supabase") {
-    const sb = await supabaseServerClient();
-    await sb.auth.signOut();
-  }
-  (await cookies()).delete(SESSION_COOKIE);
-  redirect("/login");
-}
-
-const inviteInput = z.object({ email: z.string().trim().toLowerCase().email(), role: z.enum(ROLES), leadTrackIds: z.array(z.enum(TRACK_IDS as [string, ...string[]])).default([]) });
-
-/** Creates an invitation. Local mode returns a one-time link; Supabase mode sends an email invite. */
-export async function createInvitation(input: z.input<typeof inviteInput>): Promise<AuthResult> {
-  const actor = await getActor();
-  const check = authorize(actor, "member.manage");
-  if (!check.ok) return { ok: false, error: check.reason };
-  const parsed = inviteInput.safeParse(input);
-  if (!parsed.success) return { ok: false, error: parsed.error.issues[0].message };
-  const store = getStore();
-  const token = newInviteToken();
-  const now = new Date().toISOString();
-  await store.exclusive(async () => {
-    await store.apply([
-      { op: "insert", c: "invitations", row: { id: randomUUID(), email: parsed.data.email, role: parsed.data.role, leadTrackIds: parsed.data.leadTrackIds, tokenHash: hashToken(token), createdBy: actor!.id, createdAt: now, acceptedAt: null } },
-      { op: "insert", c: "auditEvents", row: { id: randomUUID(), actorId: actor!.id, action: "member.invite", entity: "invitation", entityId: parsed.data.email, summary: `invited ${parsed.data.email} as ${parsed.data.role}`, href: "/admin", createdAt: now } },
-    ]);
-  });
-  const origin = appOrigin((await headers()).get("origin"));
-  if (authMode() === "supabase") {
-    const { createClient } = await import("@supabase/supabase-js");
-    const admin = createClient(env.supabaseUrl, env.supabaseServiceRoleKey, { auth: { persistSession: false } });
-    const { error } = await admin.auth.admin.inviteUserByEmail(parsed.data.email, { redirectTo: `${origin}/auth/callback` });
-    if (error) return { ok: false, error: `Invitation recorded, but the email failed: ${error.message}` };
-    return { ok: true };
-  }
-  return { ok: true, link: `${origin}/login?invite=${token}&email=${encodeURIComponent(parsed.data.email)}` };
+  const jar = await cookies();
+  jar.delete(ADMIN_COOKIE);
+  jar.delete(SESSION_COOKIE);
+  redirect("/");
 }
