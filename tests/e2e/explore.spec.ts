@@ -137,3 +137,13 @@ test("guided walkthrough steps through a task and remembers progress", async ({ 
   await expect(page.getByRole("button", { name: "Continue" })).toBeVisible();
   await expect(page.getByText(/1\/\d+ done/)).toBeVisible();
 });
+
+test("team dashboard groups recommendations and switches tabs", async ({ page }) => {
+  await page.goto("/");
+  const dash = page.getByRole("tablist", { name: "Team dashboard" });
+  await expect(page.getByRole("heading", { name: /tasks: critical task has no owner/ })).toBeVisible();
+  await dash.getByRole("tab", { name: /Other teams/ }).click();
+  await expect(page.getByRole("heading", { name: "Motion command interface, status and faults" })).toBeVisible();
+  await dash.getByRole("tab", { name: /Sprint & schedule/ }).click();
+  await expect(page.getByRole("heading", { name: "Next sprint" })).toBeVisible();
+});

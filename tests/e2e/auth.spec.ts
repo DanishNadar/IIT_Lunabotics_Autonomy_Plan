@@ -23,7 +23,7 @@ test.describe("public access and admin unlock", () => {
     await expect(page.getByRole("checkbox").first()).toBeDisabled();
 
     await page.goto("/");
-    await expect(page.getByRole("heading", { name: "Autonomy overview" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Team dashboard" })).toBeVisible();
     await page.goto("/login");
     await expect(page).toHaveURL(/\/admin/);
     await expect(page.getByRole("button", { name: "Add member" })).toHaveCount(0);
@@ -59,7 +59,7 @@ test.describe("public access and admin unlock", () => {
 
   test("local demo personas still work for role-based testing", async ({ page }) => {
     await loginAs(page, "Demo Autonomy Lead");
-    await expect(page.getByRole("heading", { name: "Autonomy overview" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Team dashboard" })).toBeVisible();
     await page.getByRole("button", { name: "Account menu" }).click();
     await page.getByRole("menuitem", { name: "Sign out" }).click();
     await expect(page.getByRole("button", { name: "Account menu" })).toHaveCount(0);
