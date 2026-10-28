@@ -1,5 +1,6 @@
 "use client";
 
+import { CodeLegend } from "@/components/tasks/bits";
 import { Bookmark, CalendarDays, Columns3, GanttChart, Layers, List, Plus, Save, Search, Table2, Trash2, Users } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState, type ReactNode } from "react";
@@ -80,8 +81,9 @@ export function BoardClient({ tasks, savedViews }: { tasks: TaskSummary[]; saved
   const visible = useMemo(() => applyFilters(tasks, filters), [tasks, filters]);
 
   return (
-    <div className="flex h-[calc(100vh-44px)] flex-col">
+    <div className="flex h-[calc(100vh-64px)] flex-col">
       <div className="space-y-2 border-b border-line px-4 pt-3 pb-2">
+        <CodeLegend className="px-3 py-2 text-[13px]" />
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="mr-2 text-[15px] font-semibold">All Tasks</h1>
           <div className="relative w-full max-w-xs">

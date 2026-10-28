@@ -106,6 +106,10 @@ Administration → **Add a team member** creates a member record (name, role, ca
 
 Set `DISCORD_WEBHOOK_URL` to post team-level events only: new blockers, review requests, sprint starts, and reviews. Without it, nothing is sent to Discord. Per-task **Copy for Discord** only copies text to your clipboard.
 
+### Assignment emails (optional)
+
+**Admin → Email task lists** builds an email for each person, listing their open tasks: full name, category, role, status, due date, first unfinished step and a link. **Open in Gmail** and **Open in my email app** open a ready draft to send yourself, with no setup. To send straight from the page, set `RESEND_API_KEY` and `EMAIL_FROM` (a sender on a domain verified in Resend). Emails are only sent when an admin presses **Send**. Member email addresses are only visible to admins.
+
 ## Deployment (Vercel)
 
 1. Push the repo to GitHub and import it in Vercel (**Add New → Project**). `vercel.json` sets the Next.js framework, `npm ci` and `npm run build`. Node ≥ 20.9 is declared in `package.json`.
@@ -121,6 +125,7 @@ Set `DISCORD_WEBHOOK_URL` to post team-level events only: new blockers, review r
    | `SESSION_SECRET` | yes | Long random string that signs the admin cookie (`openssl rand -base64 48`) |
    | `GITHUB_TOKEN` | optional | Fine-grained, read-only |
    | `DISCORD_WEBHOOK_URL` | optional | |
+   | `RESEND_API_KEY`, `EMAIL_FROM` | optional | Send assignment emails from /admin; without them emails open as drafts |
 
    `DATA_FILE` and `DEMO_ACCOUNTS` apply to local mode only. Demo personas are off once Supabase is configured.
 4. Deploy, then open `/api/health`. It should return `{"ok":true,"store":"supabase"}`.

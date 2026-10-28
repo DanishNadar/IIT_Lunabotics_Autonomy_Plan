@@ -9,7 +9,7 @@ import { DIFFICULTY_BARS, DIFFICULTY_LABEL, PRIORITY_LABEL, PRIORITY_TONE, STATU
 import { cn } from "@/lib/utils";
 import { Tip } from "../ui/overlay";
 import { Avatar, Badge } from "../ui/primitives";
-import { useLookup } from "../workspace";
+import { useLookup, useWorkspace } from "../workspace";
 
 export function StatusBadge({ status }: { status: TaskStatus }) {
   return (
@@ -54,7 +54,7 @@ export function TrackChip({ trackId, withName }: { trackId: TrackId; withName?: 
   const { track } = useLookup();
   const t = track.get(trackId);
   return (
-    <span className="inline-flex items-center gap-1 font-mono text-xs font-semibold" style={{ color: t?.color }} title={t ? `${t.emoji} ${t.discordChannel}` : undefined}>
+    <span className="inline-flex items-center gap-1 font-mono text-xs font-semibold" style={{ color: t?.color }} title={t ? `${trackId} = ${t.name}` : undefined}>
       <span className="text-[13px] leading-none" aria-hidden>{t?.emoji}</span>
       {trackId}
       {withName && t && <span className="font-sans text-[13px] font-normal text-muted">{t.name}</span>}
@@ -141,12 +141,57 @@ export function DepIndicator({ t }: { t: Pick<TaskSummary, "missingDeps" | "prer
   );
 }
 
-export function TaskLink({ k, title, className }: { k: string; title?: string; className?: string }) {
-  return (
+/** Splits "SF-01" into its category ("SF") and number ("01"). */
+export function parseKey(key: string): { trackId: string; number: string } {
+  const i = key.lastIndexOf("-");
+  return i < 0 ? { trackId: key, number: "" } : { trackId: key.slice(0, i), number: key.slice(i + 1) };
+}
+
+/** A task code with its category emoji; hovering explains what the letters mean. */
+export function TaskLink({ k, title, className, wrap }: { k: string; title?: string; className?: string; wrap?: boolean }) {
+  const { track } = useLookup();
+  const { trackId, number } = parseKey(k);
+  const t = track.get(trackId as TrackId);
+  const link = (
     <Link href={`/tasks/${k}`} className={cn("group inline-flex min-w-0 items-baseline gap-1.5 hover:text-fg", className)}>
-      <span className="font-mono text-[13px] text-muted group-hover:text-info">{k}</span>
-      {title && <span className="truncate text-fg-2 group-hover:text-fg">{title}</span>}
+      <span className="shrink-0 font-mono text-[13px] whitespace-nowrap text-muted group-hover:text-info">
+        {t && <span className="mr-1 font-sans" aria-hidden>{t.emoji}</span>}
+        {k}
+      </span>
+      {title && <span className={cn("text-fg-2 group-hover:text-fg", wrap ? "break-words" : "truncate")}>{title}</span>}
     </Link>
+  );
+  if (!t) return link;
+  return (
+    <Tip
+      content={
+        <span>
+          <b>{k}</b> = {t.name} task #{Number(number) || number}
+          {title && <span className="mt-0.5 block text-muted">{title}</span>}
+        </span>
+      }
+    >
+      {link}
+    </Tip>
+  );
+}
+
+/** Explains what the category letters in task codes stand for. */
+export function CodeLegend({ className }: { className?: string }) {
+  const { tracks } = useWorkspace();
+  return (
+    <div className={cn("flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-line bg-panel/70 px-4 py-3 text-[14px]", className)}>
+      <span className="font-medium text-fg">What the codes mean:</span>
+      {tracks.map((t) => (
+        <span key={t.id} className="inline-flex items-center gap-1.5">
+          <span className="rounded-md px-1.5 py-0.5 font-mono text-[13px] font-semibold" style={{ color: t.color, background: `${t.color}1f` }}>{t.id}</span>
+          <span className="text-fg-2">
+            <span aria-hidden>{t.emoji}</span> {t.name}
+          </span>
+        </span>
+      ))}
+      <Link href="/glossary" className="ml-auto text-info hover:underline">All terms explained →</Link>
+    </div>
   );
 }
 

@@ -28,6 +28,7 @@ import {
 const id = z.string().min(1).max(64);
 const text = (max = 4000) => z.string().trim().max(max);
 const trackId = z.enum(TRACK_IDS as [string, ...string[]]);
+const emailAddress = z.union([z.literal(""), z.string().trim().toLowerCase().email("That doesn't look like an email address").max(200)]);
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}/, "Expected YYYY-MM-DD").nullable();
 const ratings = z.object(Object.fromEntries(REVIEW_DIMENSIONS.map((d) => [d, z.enum(["pass", "concern", "fail", "na"])])) as Record<
   (typeof REVIEW_DIMENSIONS)[number],
@@ -179,6 +180,7 @@ export const commandSchema = z.discriminatedUnion("type", [
         experience: z.enum(["new", "some", "experienced"]),
         availabilityHours: z.number().min(0).max(60),
         bio: text(1000),
+        email: emailAddress,
       })
       .partial(),
   }),
@@ -190,6 +192,7 @@ export const commandSchema = z.discriminatedUnion("type", [
     leadTrackIds: z.array(trackId).default([]),
     discordHandle: text(40).nullable().default(null),
     githubUsername: z.string().trim().regex(/^[A-Za-z0-9-]{1,39}$/).nullable().default(null),
+    email: emailAddress.default(""),
   }),
   z.object({ type: z.literal("member.setRole"), memberId: id, role: z.enum(ROLES), leadTrackIds: z.array(trackId).default([]) }),
   z.object({ type: z.literal("member.setActive"), memberId: id, active: z.boolean() }),
@@ -962,7 +965,7 @@ export function handleCommand(ctx: Ctx, raw: unknown): Outcome {
         op: "insert",
         c: "members",
         row: {
-          id: memberId, name: cmd.name, email: "", passwordHash: null, role: cmd.role, isDemo: false, primaryTrackId: cmd.primaryTrackId, secondaryTrackId: null,
+          id: memberId, name: cmd.name, email: cmd.email, passwordHash: null, role: cmd.role, isDemo: false, primaryTrackId: cmd.primaryTrackId, secondaryTrackId: null,
           leadTrackIds: cmd.role === "track_lead" ? cmd.leadTrackIds : [], githubUsername: cmd.githubUsername, discordHandle: cmd.discordHandle, skills: [], experience: "new",
           availabilityHours: 5, bio: "", avatarColor: color, active: true, createdAt: now, updatedAt: now,
         } as never,

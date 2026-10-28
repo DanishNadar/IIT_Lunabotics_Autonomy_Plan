@@ -13,6 +13,10 @@ export const env = {
   /** Unlocks the Administrator identity (the only way to change data outside local demo mode). */
   adminPassword: process.env.ADMIN_PASSWORD ?? "",
   discordWebhookUrl: process.env.DISCORD_WEBHOOK_URL ?? "",
+  /** Optional: send assignment emails through Resend (https://resend.com). Both are required. */
+  resendApiKey: process.env.RESEND_API_KEY ?? "",
+  /** Verified sender, e.g. "Lunabotics Autonomy <autonomy@yourdomain.org>". */
+  emailFrom: process.env.EMAIL_FROM ?? "",
   isProduction: process.env.NODE_ENV === "production",
   /** Set automatically by Vercel. */
   vercel: process.env.VERCEL === "1",
@@ -20,3 +24,5 @@ export const env = {
 
 export const supabaseConfigured = () => !!(env.supabaseUrl && env.supabaseAnonKey && env.supabaseServiceRoleKey);
 
+
+export const emailConfigured = () => !!(env.resendApiKey && env.emailFrom);

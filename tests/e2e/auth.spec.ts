@@ -44,9 +44,28 @@ test.describe("public access and admin unlock", () => {
     await expect(page.getByRole("link", { name: "Administration" })).toBeVisible();
 
     // Admin can add a team member who has no login.
+    await page.getByRole("tab", { name: "Team members" }).click();
     await page.getByLabel("Name", { exact: true }).fill("Taylor Example");
+    await page.getByLabel("Email (optional)").fill("taylor@example.org");
     await page.getByRole("button", { name: "Add member" }).click();
-    await expect(page.getByRole("cell", { name: /Taylor Example/ })).toBeVisible();
+    await expect(page.getByLabel("Email for Taylor Example")).toHaveValue("taylor@example.org");
+
+    // The guided assign flow: person, tasks, role, review.
+    await page.getByRole("tab", { name: "Assign tasks" }).click();
+    await page.getByRole("button", { name: /Taylor Example/ }).click();
+    await page.getByLabel("Search tasks to assign").fill("SF-03");
+    await page.getByLabel("Pick SF-03").check();
+    await page.getByRole("button", { name: /Continue with 1 task/ }).click();
+    await page.getByRole("button", { name: /Owner/ }).click();
+    await page.getByRole("button", { name: "Review", exact: true }).click();
+    await page.getByRole("button", { name: "Assign 1 task" }).click();
+    await expect(page.getByRole("heading", { name: "Taylor Example now has 1 new task" })).toBeVisible();
+
+    // Then email them their list (preview + draft links; no provider configured in tests).
+    await page.getByRole("button", { name: /Email Taylor their task list/ }).click();
+    await expect(page.locator('iframe[title="Email preview for Taylor Example"]')).toBeVisible();
+    await expect(page.getByText(/Subject:.*tasks \(1\)/)).toBeVisible();
+    await expect(page.getByRole("link", { name: "Open in Gmail" })).toHaveAttribute("href", /to=taylor%40example\.org.*SF-03/);
 
     await page.goto("/tasks/SF-03");
     await expect(page.getByRole("button", { name: "Assign", exact: true })).toBeVisible();

@@ -76,10 +76,11 @@ test("copy a task summary for Discord", async ({ page }) => {
 test("Autonomy General lists external team interfaces and archived Controls work", async ({ page }) => {
   await page.goto("/tracks/AG");
   await expect(page.getByText("autonomy-general").first()).toBeVisible();
-  await expect(page.getByRole("heading", { name: "External team interfaces" })).toBeVisible();
-  await expect(page.getByText("Motion command interface, status and faults")).toBeVisible();
   await page.getByRole("button", { name: /Archived \(6\)/ }).click();
   await expect(page.getByRole("link", { name: /CS-01/ })).toBeVisible();
+  await page.getByRole("tab", { name: /Other teams/ }).click();
+  await expect(page.getByRole("heading", { name: "External team interfaces" })).toBeVisible();
+  await expect(page.getByText("Motion command interface, status and faults")).toBeVisible();
 });
 
 test("dependency graph renders and opens task details", async ({ page }) => {
@@ -146,4 +147,17 @@ test("team dashboard groups recommendations and switches tabs", async ({ page })
   await expect(page.getByRole("heading", { name: "Motion command interface, status and faults" })).toBeVisible();
   await dash.getByRole("tab", { name: /Sprint & schedule/ }).click();
   await expect(page.getByRole("heading", { name: "Next sprint" })).toBeVisible();
+});
+
+test("codes and jargon are explained in the glossary and on category pages", async ({ page }) => {
+  await page.goto("/glossary");
+  await expect(page.getByRole("heading", { level: 1, name: /Every code and term/ })).toBeVisible();
+  await page.getByLabel("Search the glossary").fill("SLAM");
+  await expect(page.getByText(/Simultaneous Localization And Mapping/)).toBeVisible();
+  await page.goto("/tracks/SF");
+  await page.getByRole("tab", { name: /How it connects/ }).click();
+  await expect(page.getByText("What the codes mean:")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Needs these finished first" }).first()).toBeVisible();
+  await page.goto("/guide/assigning");
+  await expect(page.getByRole("heading", { level: 1, name: "How to assign tasks" })).toBeVisible();
 });

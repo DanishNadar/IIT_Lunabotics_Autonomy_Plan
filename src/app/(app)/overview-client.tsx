@@ -25,12 +25,13 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import Link from "next/link";
 import { useState, type ReactNode } from "react";
 import { StatusBadge, TaskLink, TrackChip } from "@/components/tasks/bits";
 import { CreateTaskDialog } from "@/components/tasks/create-task-dialog";
 import { CountUp, GrowBar, Reveal } from "@/components/ui/motion";
+import { Card, TabBar, TabPanel, type TabDef } from "@/components/ui/tabs";
 import { Avatar, Badge, Button, Stat } from "@/components/ui/primitives";
 import { useCommand } from "@/components/use-command";
 import { useCan, useLookup, useWorkspace } from "@/components/workspace";
@@ -78,10 +79,9 @@ export function OverviewClient(p: Props) {
 type TabId = "attention" | "schedule" | "progress" | "activity" | "teams";
 
 function TeamDashboard(p: Props) {
-  const reduce = useReducedMotion();
   const groups = groupRecommendations(p.recommendations);
   const attentionCount = groups.length + p.integrationBlockers.length + p.claims.length;
-  const tabs: { id: TabId; label: string; icon: ReactNode; count?: number }[] = [
+  const tabs: TabDef<TabId>[] = [
     { id: "attention", label: "Needs attention", icon: <BellRing />, count: attentionCount },
     { id: "schedule", label: "Sprint & schedule", icon: <CalendarRange /> },
     { id: "progress", label: "Progress", icon: <LayoutGrid /> },
@@ -109,48 +109,16 @@ function TeamDashboard(p: Props) {
         </Link>
       </Reveal>
 
-      <div role="tablist" aria-label="Team dashboard" className="flex gap-2 overflow-x-auto rounded-xl border border-line bg-panel/70 p-1.5">
-        {tabs.map((t) => (
-          <button
-            key={t.id}
-            role="tab"
-            aria-selected={tab === t.id}
-            onClick={() => setTab(t.id)}
-            className={cn("relative flex shrink-0 items-center gap-2 rounded-lg px-4 py-2.5 text-[15px] font-medium transition-colors [&_svg]:size-[18px]", tab === t.id ? "text-fg" : "text-muted hover:text-fg")}
-          >
-            {tab === t.id && <motion.span layoutId="dash-tab" className="absolute inset-0 rounded-lg bg-panel-3" transition={{ type: "spring", stiffness: 400, damping: 32 }} />}
-            <span className="relative flex items-center gap-2">
-              {t.icon}
-              {t.label}
-              {!!t.count && <span className="rounded-full bg-accent px-2 py-0.5 text-xs font-bold text-white">{t.count}</span>}
-            </span>
-          </button>
-        ))}
-      </div>
+      <TabBar tabs={tabs} value={tab} onChange={setTab} label="Team dashboard" />
 
-      <AnimatePresence mode="wait">
-        <motion.div key={tab} role="tabpanel" initial={reduce ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }}>
-          {tab === "attention" && <AttentionTab p={p} groups={groups} />}
-          {tab === "schedule" && <ScheduleTab p={p} />}
-          {tab === "progress" && <ProgressTab p={p} />}
-          {tab === "activity" && <ActivityTab p={p} />}
-          {tab === "teams" && <TeamsTab p={p} />}
-        </motion.div>
-      </AnimatePresence>
+      <TabPanel id={tab}>
+        {tab === "attention" && <AttentionTab p={p} groups={groups} />}
+        {tab === "schedule" && <ScheduleTab p={p} />}
+        {tab === "progress" && <ProgressTab p={p} />}
+        {tab === "activity" && <ActivityTab p={p} />}
+        {tab === "teams" && <TeamsTab p={p} />}
+      </TabPanel>
     </section>
-  );
-}
-
-function Card({ title, icon, action, children, className }: { title: string; icon?: ReactNode; action?: ReactNode; children: ReactNode; className?: string }) {
-  return (
-    <div className={cn("rounded-xl border border-line bg-panel/90 p-6 shadow-[var(--shadow)]", className)}>
-      <div className="mb-5 flex items-center gap-3">
-        {icon && <span className="flex size-10 items-center justify-center rounded-lg bg-accent-soft text-accent [&_svg]:size-5">{icon}</span>}
-        <h3 className="flex-1 text-[19px] font-semibold">{title}</h3>
-        {action}
-      </div>
-      {children}
-    </div>
   );
 }
 

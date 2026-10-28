@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CommandError } from "@/lib/domain/commands";
+import { assignmentDigest, renderAssignmentEmail } from "@/lib/domain/email";
 import { ADMIN, Harness, LEAD, MEMBER_A, MEMBER_B, TRACK_LEAD_SF, VIEWER } from "../helpers";
 
 const ratings = { functional: "pass", documentation: "pass", testing: "pass", interfaces: "pass", performance: "pass", safety: "pass", integration: "pass" } as const;
@@ -232,5 +233,36 @@ describe("team members without accounts", () => {
     expect(() => h.run(ADMIN, { type: "member.create", name: "taylor example" })).toThrow(/already exists/);
     h.run(ADMIN, { type: "task.assign", taskId: h.task("SF-01").id, memberId: m.id, role: "owner", responsibility: "Owner" });
     expect(h.db.assignments.some((a) => a.memberId === m.id)).toBe(true);
+  });
+
+  it("stores email addresses for task-list emails and validates them", () => {
+    const h = new Harness();
+    h.run(ADMIN, { type: "member.create", name: "Robin Example", email: "Robin@Example.org" });
+    const m = h.db.members.find((x) => x.name === "Robin Example")!;
+    expect(m.email).toBe("robin@example.org");
+    expect(() => h.run(ADMIN, { type: "profile.update", memberId: m.id, patch: { email: "not an email" } })).toThrow();
+    expect(() => h.run(MEMBER_A, { type: "profile.update", memberId: m.id, patch: { email: "x@example.org" } })).toThrow();
+    h.run(ADMIN, { type: "profile.update", memberId: m.id, patch: { email: "" } });
+    expect(h.db.members.find((x) => x.id === m.id)!.email).toBe("");
+  });
+});
+
+describe("assignment emails", () => {
+  it("lists a member's open tasks, owners first, with next step and links", () => {
+    const h = new Harness();
+    h.run(ADMIN, { type: "member.create", name: "Robin Example", email: "robin@example.org" });
+    const m = h.db.members.find((x) => x.name === "Robin Example")!;
+    h.run(ADMIN, { type: "task.assign", taskId: h.task("SF-03").id, memberId: m.id, role: "contributor", responsibility: "" });
+    h.run(ADMIN, { type: "task.assign", taskId: h.task("SF-01").id, memberId: m.id, role: "owner", responsibility: "" });
+    const d = assignmentDigest(h.db, m.id)!;
+    expect(d.items.map((i) => [i.key, i.role])).toEqual([["SF-01", "owner"], ["SF-03", "contributor"]]);
+    expect(d.items[0].category).toBe("Sensor Fusion & Localization");
+    expect(d.items[0].nextStep).toBeTruthy();
+    const e = renderAssignmentEmail(d, { baseUrl: "https://board.example", team: "Test autonomy", note: "Welcome <b>aboard</b>" });
+    expect(e.subject).toBe("Your autonomy tasks (2)");
+    expect(e.text).toContain("https://board.example/tasks/SF-01");
+    expect(e.text).toContain("Hi Robin,");
+    expect(e.html).toContain("Welcome &lt;b&gt;aboard&lt;/b&gt;");
+    expect(e.html).not.toContain("<b>aboard</b>");
   });
 });

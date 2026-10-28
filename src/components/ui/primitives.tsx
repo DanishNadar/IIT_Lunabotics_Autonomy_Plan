@@ -18,17 +18,21 @@ const BUTTON_SIZE: Record<ButtonSize, string> = {
   icon: "h-9 w-9 justify-center",
 };
 
+/** Button styling for links that should look like buttons. */
+export const buttonClass = (variant: ButtonVariant = "secondary", size: ButtonSize = "sm", className?: string) =>
+  cn(
+    "inline-flex shrink-0 items-center rounded-md font-medium whitespace-nowrap transition-all duration-150 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4",
+    BUTTON_VARIANT[variant],
+    BUTTON_SIZE[size],
+    className,
+  );
+
 export const Button = forwardRef<HTMLButtonElement, ButtonHTMLAttributes<HTMLButtonElement> & { variant?: ButtonVariant; size?: ButtonSize }>(
   ({ className, variant = "secondary", size = "sm", type = "button", ...props }, ref) => (
     <button
       ref={ref}
       type={type}
-      className={cn(
-        "inline-flex shrink-0 items-center rounded-md font-medium whitespace-nowrap transition-all duration-150 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4",
-        BUTTON_VARIANT[variant],
-        BUTTON_SIZE[size],
-        className,
-      )}
+      className={buttonClass(variant, size, className)}
       {...props}
     />
   ),

@@ -2,6 +2,7 @@
 
 import {
   Activity,
+  BookA,
   BookOpen,
   Boxes,
   CalendarRange,
@@ -18,6 +19,7 @@ import {
   Menu as MenuIcon,
   Rocket,
   Settings,
+  UserCheck,
   Users,
   X,
 } from "lucide-react";
@@ -31,7 +33,7 @@ import { LiveRefresh } from "./live-refresh";
 import { Topbar } from "./topbar";
 import { isGuestId } from "@/lib/guest";
 
-type NavItem = { href: string; label: string; icon: ReactNode; count?: number };
+type NavItem = { href: string; label: string; icon: ReactNode; count?: number; code?: string; codeColor?: string };
 
 function NavGroup({ title, items, active, small }: { title?: string; items: NavItem[]; active: (href: string) => boolean; small?: boolean }) {
   return (
@@ -51,6 +53,11 @@ function NavGroup({ title, items, active, small }: { title?: string; items: NavI
           {item.icon}
           <span className="flex-1 truncate">{item.label}</span>
           {!!item.count && <span className="rounded bg-panel-2 px-1.5 font-mono text-xs text-muted">{item.count}</span>}
+          {item.code && (
+            <span aria-hidden className="rounded px-1.5 font-mono text-xs font-semibold" style={{ color: item.codeColor, background: `${item.codeColor}1f` }}>
+              {item.code}
+            </span>
+          )}
         </Link>
       ))}
     </div>
@@ -65,11 +72,12 @@ export function AppShell({ children, counts, realtime }: { children: ReactNode; 
 
   const nav: NavItem[] = [
     { href: "/start", label: "Start here", icon: <Compass /> },
+    { href: "/glossary", label: "Glossary", icon: <BookA /> },
     { href: "/", label: "Overview", icon: <LayoutDashboard /> },
     ...(isGuestId(actor.id) ? [] : [{ href: "/my-work", label: "My Tasks", icon: <Inbox />, count: counts.myActive }]),
     { href: "/board", label: "All Tasks", icon: <KanbanSquare /> },
   ];
-  const categories: NavItem[] = tracks.map((t) => ({ href: `/tracks/${t.id}`, label: t.shortName, icon: <span className="flex size-[18px] items-center justify-center text-[17px] leading-none">{t.emoji}</span> }));
+  const categories: NavItem[] = tracks.map((t) => ({ href: `/tracks/${t.id}`, label: t.shortName, code: t.id, codeColor: t.color, icon: <span className="flex size-[18px] items-center justify-center text-[17px] leading-none">{t.emoji}</span> }));
   const planning: NavItem[] = [
     { href: "/sprints", label: "Sprint Planning", icon: <CalendarRange /> },
     { href: "/graph", label: "Dependency Graph", icon: <GitFork /> },
@@ -81,6 +89,7 @@ export function AppShell({ children, counts, realtime }: { children: ReactNode; 
     { href: "/readiness", label: "Mission Readiness", icon: <Rocket /> },
   ];
   const more: NavItem[] = [
+    { href: "/guide/assigning", label: "How assigning works", icon: <UserCheck /> },
     { href: "/docs", label: "Knowledge Base", icon: <BookOpen /> },
     { href: "/roadmap", label: "Technical Roadmap", icon: <GanttChart /> },
     { href: "/activity", label: "Activity Feed", icon: <Activity /> },
