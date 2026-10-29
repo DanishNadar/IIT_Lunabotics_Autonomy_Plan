@@ -13,9 +13,12 @@ export const env = {
   /** Unlocks the Administrator identity (the only way to change data outside local demo mode). */
   adminPassword: process.env.ADMIN_PASSWORD ?? "",
   discordWebhookUrl: process.env.DISCORD_WEBHOOK_URL ?? "",
-  /** Optional: send assignment emails through Resend (https://resend.com). Both are required. */
+  /** Optional: send assignment emails from a Gmail account using a Google app password. */
+  gmailUser: process.env.GMAIL_USER ?? "",
+  gmailAppPassword: (process.env.GMAIL_APP_PASSWORD ?? "").replace(/\s+/g, ""),
+  /** Optional alternative: send through Resend (https://resend.com). Needs EMAIL_FROM too. */
   resendApiKey: process.env.RESEND_API_KEY ?? "",
-  /** Verified sender, e.g. "Lunabotics Autonomy <autonomy@yourdomain.org>". */
+  /** Sender, e.g. "Lunabotics Autonomy <autonomy@yourdomain.org>". With Gmail it defaults to GMAIL_USER. */
   emailFrom: process.env.EMAIL_FROM ?? "",
   isProduction: process.env.NODE_ENV === "production",
   /** Set automatically by Vercel. */
@@ -25,4 +28,6 @@ export const env = {
 export const supabaseConfigured = () => !!(env.supabaseUrl && env.supabaseAnonKey && env.supabaseServiceRoleKey);
 
 
-export const emailConfigured = () => !!(env.resendApiKey && env.emailFrom);
+export const gmailConfigured = () => !!(env.gmailUser && env.gmailAppPassword);
+
+export const emailConfigured = () => gmailConfigured() || !!(env.resendApiKey && env.emailFrom);

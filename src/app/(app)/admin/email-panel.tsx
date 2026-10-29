@@ -53,7 +53,7 @@ export function EmailPanel({ people, digests, configured, focus }: { people: Per
           <Info className="mt-0.5 size-5 shrink-0 text-info" />
           <div className="space-y-1">
             <p><b className="text-fg">You can email people right now</b> with “Open in Gmail” or “Open in my email app”: the message is written for you, you just press send.</p>
-            <p className="text-muted">To send straight from this page instead, whoever manages the Vercel project adds two settings: <code>RESEND_API_KEY</code> (a free key from resend.com) and <code>EMAIL_FROM</code> (the sender address).</p>
+            <p className="text-muted">To send straight from this page instead, whoever manages the Vercel project adds two settings: <code>GMAIL_USER</code> (the Gmail address to send from) and <code>GMAIL_APP_PASSWORD</code> (a Google app password for that account).</p>
           </div>
         </div>
       )}

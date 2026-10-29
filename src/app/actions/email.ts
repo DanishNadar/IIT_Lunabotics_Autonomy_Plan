@@ -19,7 +19,7 @@ export async function sendAssignmentEmails(raw: { memberIds: string[]; note?: st
   const actor = await getActor();
   const auth = authorize(actor, "member.manage");
   if (!auth.ok) return { ok: false, error: "Only an administrator can send emails." };
-  if (!emailConfigured()) return { ok: false, error: "Email sending isn't set up on this server. Use \"Open in my email app\" instead, or ask whoever manages hosting to add RESEND_API_KEY and EMAIL_FROM." };
+  if (!emailConfigured()) return { ok: false, error: "Email sending isn't set up on this server. Use \"Open in my email app\" instead, or ask whoever manages hosting to add GMAIL_USER and GMAIL_APP_PASSWORD." };
   const parsed = input.safeParse(raw);
   if (!parsed.success) return { ok: false, error: "Pick between 1 and 50 people." };
 

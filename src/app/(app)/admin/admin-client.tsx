@@ -176,7 +176,7 @@ function SettingsTab({ settings, integrations, counts }: Pick<Props, "settings" 
           <Status ok={integrations.supabase} label="Supabase database" hint="NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY (server only)" />
           <Status ok={integrations.adminPassword} label="Admin password" hint="ADMIN_PASSWORD unlocks editing. Changing it signs every admin out." />
           <Status ok={integrations.sessionSecret} label="Session secret" hint="SESSION_SECRET signs the admin session cookie; required in production" />
-          <Status ok={integrations.email} label="Sending email from this page (optional)" hint="RESEND_API_KEY and EMAIL_FROM. Without them, emails open in Gmail or your email app for you to send." />
+          <Status ok={integrations.email} label="Sending email from this page (optional)" hint="GMAIL_USER and GMAIL_APP_PASSWORD (or RESEND_API_KEY and EMAIL_FROM). Without them, emails open in Gmail or your email app for you to send." />
           <Status ok={integrations.githubToken} label="GitHub API token (optional)" hint="GITHUB_TOKEN: fine-grained, read-only. Raises rate limits; required for private repos." />
           <Status ok={integrations.discord} label="Discord team summaries (optional)" hint="DISCORD_WEBHOOK_URL posts blockers, review requests and sprint starts only" />
           <Status ok={!integrations.demoAccounts} label={integrations.demoAccounts ? "Demo accounts are ENABLED" : "Demo accounts disabled"} hint="DEMO_ACCOUNTS=false hides and disables the labeled demo identities" />

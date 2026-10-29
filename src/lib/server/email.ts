@@ -1,9 +1,33 @@
 import "server-only";
-import { env } from "./env";
+import nodemailer, { type Transporter } from "nodemailer";
+import { env, gmailConfigured } from "./env";
 
-/** Sends one email through Resend. Only called after an admin explicitly presses Send. */
-export async function sendEmail(msg: { to: string; subject: string; text: string; html: string }): Promise<{ ok: true } | { ok: false; error: string }> {
-  if (!env.resendApiKey || !env.emailFrom) return { ok: false, error: "Email sending is not configured." };
+type Msg = { to: string; subject: string; text: string; html: string };
+type Result = { ok: true } | { ok: false; error: string };
+
+/** Sends one email through Gmail (preferred when set) or Resend. Only called after an admin explicitly presses Send. */
+export async function sendEmail(msg: Msg): Promise<Result> {
+  if (gmailConfigured()) return sendViaGmail(msg);
+  if (env.resendApiKey && env.emailFrom) return sendViaResend(msg);
+  return { ok: false, error: "Email sending is not configured." };
+}
+
+let gmail: Transporter | null = null;
+
+async function sendViaGmail(msg: Msg): Promise<Result> {
+  gmail ??= nodemailer.createTransport({ service: "gmail", auth: { user: env.gmailUser, pass: env.gmailAppPassword } });
+  try {
+    await gmail.sendMail({ from: env.emailFrom || env.gmailUser, to: msg.to, subject: msg.subject, text: msg.text, html: msg.html });
+    return { ok: true };
+  } catch (e) {
+    console.warn("gmail send failed", e);
+    const code = (e as { code?: string; responseCode?: number }).code;
+    if (code === "EAUTH") return { ok: false, error: "Gmail rejected the login. Check GMAIL_USER and GMAIL_APP_PASSWORD (an app password, not your normal password)." };
+    return { ok: false, error: "Could not send through Gmail." };
+  }
+}
+
+async function sendViaResend(msg: Msg): Promise<Result> {
   try {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",

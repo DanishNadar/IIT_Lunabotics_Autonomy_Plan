@@ -108,7 +108,7 @@ Set `DISCORD_WEBHOOK_URL` to post team-level events only: new blockers, review r
 
 ### Assignment emails (optional)
 
-**Admin → Email task lists** builds an email for each person, listing their open tasks: full name, category, role, status, due date, first unfinished step and a link. **Open in Gmail** and **Open in my email app** open a ready draft to send yourself, with no setup. To send straight from the page, set `RESEND_API_KEY` and `EMAIL_FROM` (a sender on a domain verified in Resend). Emails are only sent when an admin presses **Send**. Member email addresses are only visible to admins.
+**Admin → Email task lists** builds an email for each person, listing their open tasks: full name, category, role, status, due date, first unfinished step and a link. **Open in Gmail** and **Open in my email app** open a ready draft to send yourself, with no setup. To send straight from the page, set `GMAIL_USER` and `GMAIL_APP_PASSWORD` (a Google app password), or `RESEND_API_KEY` and `EMAIL_FROM` (a sender on a domain verified in Resend). Emails are only sent when an admin presses **Send**. Member email addresses are only visible to admins.
 
 ## Deployment (Vercel)
 
@@ -125,7 +125,8 @@ Set `DISCORD_WEBHOOK_URL` to post team-level events only: new blockers, review r
    | `SESSION_SECRET` | yes | Long random string that signs the admin cookie (`openssl rand -base64 48`) |
    | `GITHUB_TOKEN` | optional | Fine-grained, read-only |
    | `DISCORD_WEBHOOK_URL` | optional | |
-   | `RESEND_API_KEY`, `EMAIL_FROM` | optional | Send assignment emails from /admin; without them emails open as drafts |
+   | `GMAIL_USER`, `GMAIL_APP_PASSWORD` | optional | Send assignment emails from /admin through Gmail; without them emails open as drafts |
+   | `RESEND_API_KEY`, `EMAIL_FROM` | optional | Alternative to Gmail for sending |
 
    `DATA_FILE` and `DEMO_ACCOUNTS` apply to local mode only. Demo personas are off once Supabase is configured.
 4. Deploy, then open `/api/health`. It should return `{"ok":true,"store":"supabase"}`.
