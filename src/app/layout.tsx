@@ -9,7 +9,7 @@ const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains" }
 
 export const metadata: Metadata = {
   title: { default: "Lunabotics Autonomy Command Center", template: "%s · Lunabotics ACC" },
-  description: "Illinois Tech Robotics — NASA Lunabotics 2027 autonomy engineering platform.",
+  description: "Illinois Tech Lunabotics 2027 autonomy engineering platform.",
 };
 
 export const viewport: Viewport = { themeColor: "#0a0c0f" };

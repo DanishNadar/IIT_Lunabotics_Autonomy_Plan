@@ -3,12 +3,13 @@
 import { ArrowLeft, ArrowRight, Check, Crown, HandHelping, Mail, Search, Sparkles, UserPlus, Users } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DifficultyMeter, StatusBadge, TaskLink } from "@/components/tasks/bits";
 import { GrowBar } from "@/components/ui/motion";
 import { Avatar, Badge, Button, Input } from "@/components/ui/primitives";
 import { Card } from "@/components/ui/tabs";
 import { useCommand } from "@/components/use-command";
+import { useStoredState } from "@/components/use-stored-state";
 import { useLookup, useWorkspace } from "@/components/workspace";
 import { DIFFICULTIES, ROLE_LABEL, type Role, type TrackId } from "@/lib/domain/types";
 import type { TaskSummary } from "@/lib/domain/views";
@@ -26,6 +27,8 @@ export interface Person {
   email: string;
 }
 
+type Recent = { personId: string; keys: string[]; at: string };
+
 const STEPS = ["Pick a person", "Pick tasks", "Choose their role", "Review & assign"] as const;
 const EXPERIENCE = { new: "new to robotics", some: "somewhat experienced", experienced: "experienced" } as const;
 /** Hardest difficulty that is a comfortable first pick for each experience level. */
@@ -36,18 +39,21 @@ export function AssignWizard({ people, tasks, onEmail, onAddPerson }: { people: 
   const { run } = useCommand();
   const { tracks } = useWorkspace();
   const { member, track } = useLookup();
-  const [step, setStep] = useState(0);
-  const [personId, setPersonId] = useState<string | null>(null);
-  const [picked, setPicked] = useState<string[]>([]);
-  const [role, setRole] = useState<"owner" | "contributor">("owner");
-  const [note, setNote] = useState("");
-  const [cat, setCat] = useState<TrackId | "all">("all");
+  // Progress is saved in this browser, so leaving the page or reloading doesn't lose it.
+  const [step, setStep] = useStoredState("lacc-assign:step", 0);
+  const [personId, setPersonId] = useStoredState<string | null>("lacc-assign:person", null);
+  const [picked, setPicked] = useStoredState<string[]>("lacc-assign:picked", []);
+  const [role, setRole] = useStoredState<"owner" | "contributor">("lacc-assign:role", "owner");
+  const [note, setNote] = useStoredState("lacc-assign:note", "");
+  const [cat, setCat] = useStoredState<TrackId | "all">("lacc-assign:cat", "all");
   const [q, setQ] = useState("");
-  const [showOwned, setShowOwned] = useState(false);
+  const [showOwned, setShowOwned] = useStoredState("lacc-assign:owned", false);
   const [busy, setBusy] = useState(false);
-  const [result, setResult] = useState<{ ok: string[]; failed: string[] } | null>(null);
+  const [result, setResult] = useStoredState<{ ok: string[]; failed: string[] } | null>("lacc-assign:result", null);
+  const [recent, setRecent] = useStoredState<Recent[]>("lacc-assign:recent", []);
 
   const person = people.find((p) => p.id === personId) ?? null;
+  const recentShown = recent.filter((r) => people.some((p) => p.id === r.personId));
   const openCount = (id: string) => tasks.filter((t) => t.status !== "completed" && t.assignees.some((a) => a.memberId === id)).length;
 
   const candidates = useMemo(() => {
@@ -81,6 +87,7 @@ export function AssignWizard({ people, tasks, onEmail, onAddPerson }: { people: 
     }
     setBusy(false);
     setResult({ ok, failed });
+    if (ok.length) setRecent((rs) => [{ personId: person.id, keys: ok, at: new Date().toISOString() }, ...rs].slice(0, 6));
   };
 
   const reset = () => {
@@ -91,6 +98,12 @@ export function AssignWizard({ people, tasks, onEmail, onAddPerson }: { people: 
     setRole("owner");
     setResult(null);
   };
+
+  // A saved person who has since been removed: start over instead of showing a broken step.
+  useEffect(() => {
+    if (personId && !people.some((p) => p.id === personId)) reset();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [personId, people]);
 
   return (
     <Card title="Assign tasks, step by step" icon={<Sparkles />} subtitle="Four short steps. You can go back at any time.">
@@ -125,6 +138,7 @@ export function AssignWizard({ people, tasks, onEmail, onAddPerson }: { people: 
             </div>
           ) : step === 0 ? (
             <div className="space-y-4">
+              {recentShown.length > 0 && <RecentAssignments recent={recentShown} people={people} onEmail={onEmail} onClear={() => setRecent([])} />}
               <p className="text-[16px] text-fg-2">Who are you giving work to?</p>
               {people.length ? (
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -270,6 +284,30 @@ function Nav({ back, next, nextLabel, nextDisabled, primaryIcon }: { back: () =>
     <div className="flex items-center justify-between gap-3 border-t border-line pt-5">
       <Button variant="ghost" onClick={back}><ArrowLeft /> Back</Button>
       <Button variant="primary" onClick={next} disabled={nextDisabled}>{nextLabel} {primaryIcon ?? <ArrowRight />}</Button>
+    </div>
+  );
+}
+
+/** Assignments made recently in this browser, so you can come back and email them later. */
+function RecentAssignments({ recent, people, onEmail, onClear }: { recent: Recent[]; people: Person[]; onEmail: (memberId: string) => void; onClear: () => void }) {
+  return (
+    <div className="rounded-xl border border-line bg-panel-2 p-4">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="text-[15px] font-semibold">Recently assigned</div>
+        <button onClick={onClear} className="text-[13px] text-muted hover:text-fg hover:underline">Clear list</button>
+      </div>
+      <ul className="space-y-2">
+        {recent.map((r) => {
+          const p = people.find((x) => x.id === r.personId)!;
+          return (
+            <li key={r.at} className="flex flex-wrap items-center gap-3 text-[14px]">
+              <Avatar name={p.name} color={p.color} size={28} />
+              <span className="min-w-0 flex-1"><b>{p.name}</b> <span className="text-muted">got {r.keys.join(", ")} · {new Date(r.at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</span></span>
+              <Button size="sm" onClick={() => onEmail(p.id)}><Mail /> Email {p.name.split(" ")[0]}</Button>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }

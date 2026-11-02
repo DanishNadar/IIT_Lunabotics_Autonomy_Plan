@@ -13,6 +13,7 @@ import { useWorkspace } from "@/components/workspace";
 import type { AssignmentDigest } from "@/lib/domain/email";
 import { ROLES, ROLE_LABEL, type AppSettings, type PublicMember, type Role, type TrackId } from "@/lib/domain/types";
 import type { TaskSummary } from "@/lib/domain/views";
+import { useStoredState } from "@/components/use-stored-state";
 import { AssignWizard, type Person } from "./assign-wizard";
 import { EmailPanel } from "./email-panel";
 
@@ -38,7 +39,7 @@ function Status({ ok, label, hint }: { ok: boolean; label: string; hint: string 
 }
 
 export function AdminClient({ members, tasks, people, digests, settings, integrations, counts }: Props) {
-  const [tab, setTab] = useState<TabId>("assign");
+  const [tab, setTab] = useStoredState<TabId>("lacc-admin:tab", "assign");
   const [emailFocus, setEmailFocus] = useState<string | null>(null);
   const tabs: TabDef<TabId>[] = [
     { id: "assign", label: "Assign tasks", icon: <Sparkles /> },

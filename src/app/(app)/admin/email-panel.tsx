@@ -7,6 +7,7 @@ import { Avatar, Badge, Button, buttonClass, Input, Textarea } from "@/component
 import { Card } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/toast";
 import { useCommand } from "@/components/use-command";
+import { useStoredState } from "@/components/use-stored-state";
 import { useWorkspace } from "@/components/workspace";
 import { renderAssignmentEmail, type AssignmentDigest } from "@/lib/domain/email";
 import { cn } from "@/lib/utils";
@@ -17,9 +18,10 @@ export function EmailPanel({ people, digests, configured, focus }: { people: Per
   const toast = useToast();
   const [sending, start] = useTransition();
   const withTasks = digests.filter((d) => d.items.length);
-  const [selected, setSelected] = useState<string[]>(() => (focus ? [focus] : []));
-  const [previewId, setPreviewId] = useState<string | null>(focus ?? withTasks[0]?.memberId ?? null);
-  const [note, setNote] = useState("");
+  // Saved in this browser so a half-finished email survives leaving the page.
+  const [selected, setSelected] = useStoredState<string[]>("lacc-email:selected", focus ? [focus] : []);
+  const [previewId, setPreviewId] = useStoredState<string | null>("lacc-email:preview", focus ?? withTasks[0]?.memberId ?? null);
+  const [note, setNote] = useStoredState("lacc-email:note", "");
   const [origin, setOrigin] = useState("");
   useEffect(() => setOrigin(window.location.origin), []);
   useEffect(() => {
@@ -27,7 +29,7 @@ export function EmailPanel({ people, digests, configured, focus }: { people: Per
       setSelected((s) => (s.includes(focus) ? s : [...s, focus]));
       setPreviewId(focus);
     }
-  }, [focus]);
+  }, [focus, setSelected, setPreviewId]);
 
   const team = `${settings.organization} autonomy`;
   const count = (id: string) => digests.find((d) => d.memberId === id)?.items.length ?? 0;
