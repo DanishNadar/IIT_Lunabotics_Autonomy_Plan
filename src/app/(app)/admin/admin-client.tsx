@@ -14,7 +14,7 @@ import type { AssignmentDigest } from "@/lib/domain/email";
 import { ROLES, ROLE_LABEL, type AppSettings, type PublicMember, type Role, type TrackId } from "@/lib/domain/types";
 import type { TaskSummary } from "@/lib/domain/views";
 import { useStoredState } from "@/components/use-stored-state";
-import { AssignWizard, type Person } from "./assign-wizard";
+import { AssignWizard, type Person, type Recent } from "./assign-wizard";
 import { EmailPanel, type EmailLogEntry } from "./email-panel";
 
 interface Props {
@@ -23,6 +23,7 @@ interface Props {
   people: Person[];
   digests: AssignmentDigest[];
   emailLog: EmailLogEntry[];
+  recent: Recent[];
   settings: AppSettings;
   integrations: { storage: { kind: string; description: string; shared: boolean }; supabase: boolean; githubToken: boolean; adminPassword: boolean; discord: boolean; demoAccounts: boolean; sessionSecret: boolean; email: boolean };
   counts: { tasks: number; resources: number; documents: number; audit: number };
@@ -39,7 +40,7 @@ function Status({ ok, label, hint }: { ok: boolean; label: string; hint: string 
   );
 }
 
-export function AdminClient({ members, tasks, people, digests, emailLog, settings, integrations, counts }: Props) {
+export function AdminClient({ members, tasks, people, digests, emailLog, recent, settings, integrations, counts }: Props) {
   const [tab, setTab] = useStoredState<TabId>("lacc-admin:tab", "assign");
   const [emailFocus, setEmailFocus] = useState<string | null>(null);
   const tabs: TabDef<TabId>[] = [
@@ -62,6 +63,7 @@ export function AdminClient({ members, tasks, people, digests, emailLog, setting
             <AssignWizard
               people={people}
               tasks={tasks}
+              recent={recent}
               onAddPerson={() => setTab("team")}
               onEmail={(id) => {
                 setEmailFocus(id);

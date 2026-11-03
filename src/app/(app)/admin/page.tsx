@@ -22,6 +22,17 @@ export default async function AdminPage() {
     );
   }
   const people = db.members.filter((m) => m.active && m.id !== ADMIN_MEMBER_ID);
+  const openTask = new Map(db.tasks.filter((t) => !t.archived && t.status !== "completed").map((t) => [t.id, t.key]));
+  // Latest assignments, grouped per person when they were made within a few minutes of each other.
+  const recent: { personId: string; keys: string[]; at: string }[] = [];
+  for (const a of [...db.assignments].sort((x, y) => y.createdAt.localeCompare(x.createdAt))) {
+    const key = openTask.get(a.taskId);
+    if (!key || !people.some((m) => m.id === a.memberId)) continue;
+    const last = recent.at(-1);
+    if (last && last.personId === a.memberId && Date.parse(last.at) - Date.parse(a.createdAt) < 10 * 60_000) last.keys.unshift(key);
+    else if (recent.length < 8) recent.push({ personId: a.memberId, keys: [key], at: a.createdAt });
+    else break;
+  }
   return (
     <AdminClient
       members={publicMembers(db, actor)}
@@ -31,6 +42,7 @@ export default async function AdminPage() {
         .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
         .slice(0, 40)
         .map((e) => ({ id: e.id, memberId: e.entityId, ok: e.action === "email.sent", summary: e.summary, createdAt: e.createdAt }))}
+      recent={recent}
       digests={people.map((m) => assignmentDigest(db, m.id)!).filter(Boolean)}
       people={people.map((m) => ({ id: m.id, name: m.name, color: m.avatarColor, role: m.role, primaryTrackId: m.primaryTrackId, experience: m.experience, availabilityHours: m.availabilityHours, isDemo: m.isDemo, email: m.email }))}
       settings={db.settings[0]}

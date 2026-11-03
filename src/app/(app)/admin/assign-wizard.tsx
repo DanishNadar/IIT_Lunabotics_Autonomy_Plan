@@ -27,14 +27,14 @@ export interface Person {
   email: string;
 }
 
-type Recent = { personId: string; keys: string[]; at: string };
+export type Recent = { personId: string; keys: string[]; at: string };
 
 const STEPS = ["Pick a person", "Pick tasks", "Choose their role", "Review & assign"] as const;
 const EXPERIENCE = { new: "new to robotics", some: "somewhat experienced", experienced: "experienced" } as const;
 /** Hardest difficulty that is a comfortable first pick for each experience level. */
 const FIT: Record<Person["experience"], number> = { new: 0, some: 1, experienced: 3 };
 
-export function AssignWizard({ people, tasks, onEmail, onAddPerson }: { people: Person[]; tasks: TaskSummary[]; onEmail: (memberId: string) => void; onAddPerson: () => void }) {
+export function AssignWizard({ people, tasks, recent, onEmail, onAddPerson }: { people: Person[]; tasks: TaskSummary[]; recent: Recent[]; onEmail: (memberId: string) => void; onAddPerson: () => void }) {
   const reduce = useReducedMotion();
   const { run } = useCommand();
   const { tracks } = useWorkspace();
@@ -50,10 +50,11 @@ export function AssignWizard({ people, tasks, onEmail, onAddPerson }: { people: 
   const [showOwned, setShowOwned] = useStoredState("lacc-assign:owned", false);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useStoredState<{ ok: string[]; failed: string[] } | null>("lacc-assign:result", null);
-  const [recent, setRecent] = useStoredState<Recent[]>("lacc-assign:recent", []);
+  // "Clear list" only hides entries in this browser; the assignments themselves stay.
+  const [hiddenBefore, setHiddenBefore] = useStoredState("lacc-assign:recent-hidden", "");
 
   const person = people.find((p) => p.id === personId) ?? null;
-  const recentShown = recent.filter((r) => people.some((p) => p.id === r.personId));
+  const recentShown = recent.filter((r) => r.at > hiddenBefore && people.some((p) => p.id === r.personId));
   const openCount = (id: string) => tasks.filter((t) => t.status !== "completed" && t.assignees.some((a) => a.memberId === id)).length;
 
   const candidates = useMemo(() => {
@@ -87,7 +88,6 @@ export function AssignWizard({ people, tasks, onEmail, onAddPerson }: { people: 
     }
     setBusy(false);
     setResult({ ok, failed });
-    if (ok.length) setRecent((rs) => [{ personId: person.id, keys: ok, at: new Date().toISOString() }, ...rs].slice(0, 6));
   };
 
   /** Takes the tasks back off the person, then reopens the review step with the same picks so it can be redone. */
@@ -104,7 +104,6 @@ export function AssignWizard({ people, tasks, onEmail, onAddPerson }: { people: 
       if (a) await run({ type: "task.unassign", assignmentId: a.id }, { quiet: true });
     }
     setBusy(false);
-    setRecent((rs) => rs.filter((r) => !(r.personId === memberId && r.keys.join() === keys.join())));
     setResult(null);
     setPersonId(memberId);
     setCat("all");
@@ -161,7 +160,7 @@ export function AssignWizard({ people, tasks, onEmail, onAddPerson }: { people: 
             </div>
           ) : step === 0 ? (
             <div className="space-y-4">
-              {recentShown.length > 0 && <RecentAssignments recent={recentShown} people={people} onEmail={onEmail} onUndo={(r) => undo(r.personId, r.keys)} onClear={() => setRecent([])} />}
+              {recentShown.length > 0 && <RecentAssignments recent={recentShown} people={people} onEmail={onEmail} onUndo={(r) => undo(r.personId, r.keys)} onClear={() => setHiddenBefore(new Date().toISOString())} />}
               <p className="text-[16px] text-fg-2">Who are you giving work to?</p>
               {people.length ? (
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -311,7 +310,7 @@ function Nav({ back, next, nextLabel, nextDisabled, primaryIcon }: { back: () =>
   );
 }
 
-/** Assignments made recently in this browser, so you can come back and email them later. */
+/** The latest assignments on the board, so you can come back to email or undo them. */
 function RecentAssignments({ recent, people, onEmail, onUndo, onClear }: { recent: Recent[]; people: Person[]; onEmail: (memberId: string) => void; onUndo: (r: Recent) => void; onClear: () => void }) {
   return (
     <div className="rounded-xl border border-line bg-panel-2 p-4">
