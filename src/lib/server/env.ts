@@ -1,5 +1,8 @@
 import "server-only";
 
+/** Trims whitespace and surrounding quotes, which are easy to paste into a hosting dashboard by mistake. */
+const clean = (v: string | undefined) => (v ?? "").trim().replace(/^(["'])(.*)\1$/, "$2").trim();
+
 /** Server environment, read once. Nothing here is exposed to the browser. */
 export const env = {
   supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
@@ -14,12 +17,12 @@ export const env = {
   adminPassword: process.env.ADMIN_PASSWORD ?? "",
   discordWebhookUrl: process.env.DISCORD_WEBHOOK_URL ?? "",
   /** Optional: send assignment emails from a Gmail account using a Google app password. */
-  gmailUser: process.env.GMAIL_USER ?? "",
-  gmailAppPassword: (process.env.GMAIL_APP_PASSWORD ?? "").replace(/\s+/g, ""),
+  gmailUser: clean(process.env.GMAIL_USER).toLowerCase(),
+  gmailAppPassword: clean(process.env.GMAIL_APP_PASSWORD).replace(/\s+/g, ""),
   /** Optional alternative: send through Resend (https://resend.com). Needs EMAIL_FROM too. */
-  resendApiKey: process.env.RESEND_API_KEY ?? "",
+  resendApiKey: clean(process.env.RESEND_API_KEY),
   /** Sender, e.g. "Lunabotics Autonomy <autonomy@yourdomain.org>". With Gmail it defaults to GMAIL_USER. */
-  emailFrom: process.env.EMAIL_FROM ?? "",
+  emailFrom: clean(process.env.EMAIL_FROM),
   isProduction: process.env.NODE_ENV === "production",
   /** Set automatically by Vercel. */
   vercel: process.env.VERCEL === "1",

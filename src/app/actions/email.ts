@@ -1,12 +1,13 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
+import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { z } from "zod";
 import { assignmentDigest, renderAssignmentEmail } from "@/lib/domain/email";
 import { authorize } from "@/lib/domain/permissions";
 import { getActor } from "@/lib/server/auth";
-import { sendEmail } from "@/lib/server/email";
+import { checkEmailLogin, sendEmail } from "@/lib/server/email";
 import { emailConfigured } from "@/lib/server/env";
 import { getStore } from "@/lib/server/store";
 
@@ -33,6 +34,9 @@ export async function sendAssignmentEmails(raw: { memberIds: string[]; note?: st
   const team = `${db.settings[0].organization} autonomy`;
   const sent: string[] = [];
   const skipped: { name: string; reason: string }[] = [];
+  const log: Parameters<typeof store.apply>[0] = [];
+  const entry = (action: "email.sent" | "email.failed", memberId: string, summary: string) =>
+    log.push({ op: "insert", c: "auditEvents", row: { id: randomUUID(), actorId: actor.id, action, entity: "member", entityId: memberId, summary, href: "/admin", createdAt: new Date().toISOString() } });
   for (const id of new Set(parsed.data.memberIds)) {
     const m = db.members.find((x) => x.id === id);
     const d = assignmentDigest(db, id);
@@ -41,13 +45,26 @@ export async function sendAssignmentEmails(raw: { memberIds: string[]; note?: st
     if (!m.email) { skipped.push({ name: m.name, reason: "no email address saved" }); continue; }
     if (!d.items.length) { skipped.push({ name: m.name, reason: "no open tasks" }); continue; }
     const r = await sendEmail({ to: m.email, ...renderAssignmentEmail(d, { baseUrl, team, note: parsed.data.note }) });
-    if (r.ok) sent.push(m.name);
-    else skipped.push({ name: m.name, reason: r.error });
+    if (r.ok) {
+      sent.push(m.name);
+      entry("email.sent", m.id, `emailed ${m.name} their task list (${d.items.map((i) => i.key).join(", ")}) at ${m.email}`);
+    } else {
+      skipped.push({ name: m.name, reason: r.error });
+      entry("email.failed", m.id, `email to ${m.name} at ${m.email} failed: ${r.error}`);
+    }
   }
-  if (sent.length) {
-    await store.apply([
-      { op: "insert", c: "auditEvents", row: { id: randomUUID(), actorId: actor.id, action: "email.assignments", entity: "member", entityId: actor.id, summary: `emailed task lists to ${sent.join(", ")}`, href: "/admin", createdAt: new Date().toISOString() } },
-    ]);
+  if (log.length) {
+    await store.apply(log);
+    revalidatePath("/admin");
   }
   return { ok: true, sent, skipped };
+}
+
+/** Checks the email login without sending anything. Administrators only. */
+export async function checkEmailSettings(): Promise<{ ok: boolean; message: string }> {
+  const actor = await getActor();
+  if (!authorize(actor, "member.manage").ok) return { ok: false, message: "Only an administrator can do this." };
+  const r = await checkEmailLogin();
+  if (!r.ok) return { ok: false, message: r.error };
+  return { ok: true, message: r.provider === "gmail" ? `Gmail login works. Emails will come from ${r.from}.` : `Resend is set up. Emails will come from ${r.from}.` };
 }

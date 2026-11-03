@@ -20,7 +20,7 @@ export interface TaskSummary {
   reviewerId: string | null;
   claimable: boolean;
   labels: string[];
-  assignees: { memberId: string; role: "owner" | "contributor" }[];
+  assignees: { id: string; memberId: string; role: "owner" | "contributor" }[];
   progress: { done: number; total: number; pct: number };
   missingDeps: string[];
   prereqCount: number;
@@ -62,7 +62,7 @@ export function summarizeTasks(db: Database, filter?: (t: Task) => boolean): Tas
       reviewerId: t.reviewerId,
       claimable: t.claimable,
       labels: t.labels,
-      assignees: db.assignments.filter((a) => a.taskId === t.id).sort((a, b) => (a.role === "owner" ? -1 : 1) - (b.role === "owner" ? -1 : 1)).map((a) => ({ memberId: a.memberId, role: a.role })),
+      assignees: db.assignments.filter((a) => a.taskId === t.id).sort((a, b) => (a.role === "owner" ? -1 : 1) - (b.role === "owner" ? -1 : 1)).map((a) => ({ id: a.id, memberId: a.memberId, role: a.role })),
       progress: checklistProgress(items),
       missingDeps: missingDependencies(db.tasks, db.dependencies, t.id),
       prereqCount: db.dependencies.filter((d) => d.toTaskId === t.id).length,

@@ -13,18 +13,36 @@ export async function sendEmail(msg: Msg): Promise<Result> {
 }
 
 let gmail: Transporter | null = null;
+const gmailTransport = () => (gmail ??= nodemailer.createTransport({ service: "gmail", auth: { user: env.gmailUser, pass: env.gmailAppPassword } }));
+
+const gmailError = (e: unknown) => {
+  if ((e as { code?: string }).code === "EAUTH") return "Gmail rejected the login. GMAIL_USER must be the exact Gmail address the app password was created on, and GMAIL_APP_PASSWORD must be that 16-letter app password (not your normal password).";
+  const detail = e instanceof Error ? e.message.split("\n")[0].slice(0, 160) : "";
+  return `Could not send through Gmail${detail ? `: ${detail}` : "."}`;
+};
+
+/** Logs in to the email provider without sending anything, to check the settings. */
+export async function checkEmailLogin(): Promise<(Result & { provider: "gmail" | "resend" | null; from: string })> {
+  if (gmailConfigured()) {
+    try {
+      await gmailTransport().verify();
+      return { ok: true, provider: "gmail", from: env.emailFrom || env.gmailUser };
+    } catch (e) {
+      console.warn("gmail login check failed", e);
+      return { ok: false, provider: "gmail", from: env.gmailUser, error: gmailError(e) };
+    }
+  }
+  if (env.resendApiKey && env.emailFrom) return { ok: true, provider: "resend", from: env.emailFrom };
+  return { ok: false, provider: null, from: "", error: "Email sending is not configured." };
+}
 
 async function sendViaGmail(msg: Msg): Promise<Result> {
-  gmail ??= nodemailer.createTransport({ service: "gmail", auth: { user: env.gmailUser, pass: env.gmailAppPassword } });
   try {
-    await gmail.sendMail({ from: env.emailFrom || env.gmailUser, to: msg.to, subject: msg.subject, text: msg.text, html: msg.html });
+    await gmailTransport().sendMail({ from: env.emailFrom || env.gmailUser, to: msg.to, subject: msg.subject, text: msg.text, html: msg.html });
     return { ok: true };
   } catch (e) {
     console.warn("gmail send failed", e);
-    const code = (e as { code?: string; responseCode?: number }).code;
-    if (code === "EAUTH") return { ok: false, error: "Gmail rejected the login. Check GMAIL_USER and GMAIL_APP_PASSWORD (an app password, not your normal password)." };
-    const detail = e instanceof Error ? e.message.split("\n")[0].slice(0, 160) : "";
-    return { ok: false, error: `Could not send through Gmail${detail ? `: ${detail}` : "."}` };
+    return { ok: false, error: gmailError(e) };
   }
 }
 

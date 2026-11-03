@@ -26,6 +26,11 @@ export default async function AdminPage() {
     <AdminClient
       members={publicMembers(db, actor)}
       tasks={summarizeTasks(db, (t) => !t.archived)}
+      emailLog={db.auditEvents
+        .filter((e) => e.action === "email.sent" || e.action === "email.failed")
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+        .slice(0, 40)
+        .map((e) => ({ id: e.id, memberId: e.entityId, ok: e.action === "email.sent", summary: e.summary, createdAt: e.createdAt }))}
       digests={people.map((m) => assignmentDigest(db, m.id)!).filter(Boolean)}
       people={people.map((m) => ({ id: m.id, name: m.name, color: m.avatarColor, role: m.role, primaryTrackId: m.primaryTrackId, experience: m.experience, availabilityHours: m.availabilityHours, isDemo: m.isDemo, email: m.email }))}
       settings={db.settings[0]}

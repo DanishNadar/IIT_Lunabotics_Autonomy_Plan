@@ -15,13 +15,14 @@ import { ROLES, ROLE_LABEL, type AppSettings, type PublicMember, type Role, type
 import type { TaskSummary } from "@/lib/domain/views";
 import { useStoredState } from "@/components/use-stored-state";
 import { AssignWizard, type Person } from "./assign-wizard";
-import { EmailPanel } from "./email-panel";
+import { EmailPanel, type EmailLogEntry } from "./email-panel";
 
 interface Props {
   members: PublicMember[];
   tasks: TaskSummary[];
   people: Person[];
   digests: AssignmentDigest[];
+  emailLog: EmailLogEntry[];
   settings: AppSettings;
   integrations: { storage: { kind: string; description: string; shared: boolean }; supabase: boolean; githubToken: boolean; adminPassword: boolean; discord: boolean; demoAccounts: boolean; sessionSecret: boolean; email: boolean };
   counts: { tasks: number; resources: number; documents: number; audit: number };
@@ -38,7 +39,7 @@ function Status({ ok, label, hint }: { ok: boolean; label: string; hint: string 
   );
 }
 
-export function AdminClient({ members, tasks, people, digests, settings, integrations, counts }: Props) {
+export function AdminClient({ members, tasks, people, digests, emailLog, settings, integrations, counts }: Props) {
   const [tab, setTab] = useStoredState<TabId>("lacc-admin:tab", "assign");
   const [emailFocus, setEmailFocus] = useState<string | null>(null);
   const tabs: TabDef<TabId>[] = [
@@ -69,7 +70,7 @@ export function AdminClient({ members, tasks, people, digests, settings, integra
             />
           </div>
         )}
-        {tab === "email" && <EmailPanel people={people} digests={digests} configured={integrations.email} focus={emailFocus} />}
+        {tab === "email" && <EmailPanel people={people} digests={digests} emailLog={emailLog} configured={integrations.email} focus={emailFocus} />}
         {tab === "team" && <TeamTab members={members} />}
         {tab === "settings" && <SettingsTab settings={settings} integrations={integrations} counts={counts} />}
       </TabPanel>

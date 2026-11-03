@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, ArrowRight, Check, Crown, HandHelping, Mail, Search, Sparkles, UserPlus, Users } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Crown, HandHelping, Mail, Search, Sparkles, Undo2, UserPlus, Users } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -90,6 +90,28 @@ export function AssignWizard({ people, tasks, onEmail, onAddPerson }: { people: 
     if (ok.length) setRecent((rs) => [{ personId: person.id, keys: ok, at: new Date().toISOString() }, ...rs].slice(0, 6));
   };
 
+  /** Takes the tasks back off the person, then reopens the review step with the same picks so it can be redone. */
+  const undo = async (memberId: string, keys: string[]) => {
+    const p = people.find((x) => x.id === memberId);
+    if (!p || !confirm(`Take ${keys.join(", ")} back from ${p.name}? Nothing is emailed. You can then change the picks and assign again.`)) return;
+    setBusy(true);
+    const ids: string[] = [];
+    for (const key of keys) {
+      const t = tasks.find((x) => x.key === key);
+      const a = t?.assignees.find((x) => x.memberId === memberId);
+      if (!t) continue;
+      ids.push(t.id);
+      if (a) await run({ type: "task.unassign", assignmentId: a.id }, { quiet: true });
+    }
+    setBusy(false);
+    setRecent((rs) => rs.filter((r) => !(r.personId === memberId && r.keys.join() === keys.join())));
+    setResult(null);
+    setPersonId(memberId);
+    setCat("all");
+    setPicked(ids);
+    setStep(3);
+  };
+
   const reset = () => {
     setStep(0);
     setPersonId(null);
@@ -134,11 +156,12 @@ export function AssignWizard({ people, tasks, onEmail, onAddPerson }: { people: 
               <div className="flex flex-wrap justify-center gap-3 pt-2">
                 <Button variant="primary" onClick={() => onEmail(person.id)}><Mail /> Email {person.name.split(" ")[0]} their task list</Button>
                 <Button onClick={reset}><UserPlus /> Assign someone else</Button>
+                {result.ok.length > 0 && <Button variant="ghost" disabled={busy} onClick={() => undo(person.id, result.ok)}><Undo2 /> Undo this assignment</Button>}
               </div>
             </div>
           ) : step === 0 ? (
             <div className="space-y-4">
-              {recentShown.length > 0 && <RecentAssignments recent={recentShown} people={people} onEmail={onEmail} onClear={() => setRecent([])} />}
+              {recentShown.length > 0 && <RecentAssignments recent={recentShown} people={people} onEmail={onEmail} onUndo={(r) => undo(r.personId, r.keys)} onClear={() => setRecent([])} />}
               <p className="text-[16px] text-fg-2">Who are you giving work to?</p>
               {people.length ? (
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -289,7 +312,7 @@ function Nav({ back, next, nextLabel, nextDisabled, primaryIcon }: { back: () =>
 }
 
 /** Assignments made recently in this browser, so you can come back and email them later. */
-function RecentAssignments({ recent, people, onEmail, onClear }: { recent: Recent[]; people: Person[]; onEmail: (memberId: string) => void; onClear: () => void }) {
+function RecentAssignments({ recent, people, onEmail, onUndo, onClear }: { recent: Recent[]; people: Person[]; onEmail: (memberId: string) => void; onUndo: (r: Recent) => void; onClear: () => void }) {
   return (
     <div className="rounded-xl border border-line bg-panel-2 p-4">
       <div className="mb-3 flex items-center justify-between gap-3">
@@ -304,6 +327,7 @@ function RecentAssignments({ recent, people, onEmail, onClear }: { recent: Recen
               <Avatar name={p.name} color={p.color} size={28} />
               <span className="min-w-0 flex-1"><b>{p.name}</b> <span className="text-muted">got {r.keys.join(", ")} · {new Date(r.at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</span></span>
               <Button size="sm" onClick={() => onEmail(p.id)}><Mail /> Email {p.name.split(" ")[0]}</Button>
+              <Button size="sm" variant="ghost" onClick={() => onUndo(r)}><Undo2 /> Undo</Button>
             </li>
           );
         })}

@@ -1,8 +1,8 @@
 "use client";
 
-import { Check, Copy, ExternalLink, Info, Mail, Save, Send } from "lucide-react";
+import { Check, CheckCircle2, Copy, ExternalLink, History, Info, Mail, RotateCcw, Save, Send, ShieldCheck, XCircle } from "lucide-react";
 import { useEffect, useMemo, useState, useTransition } from "react";
-import { sendAssignmentEmails } from "@/app/actions/email";
+import { checkEmailSettings, sendAssignmentEmails } from "@/app/actions/email";
 import { Avatar, Badge, Button, buttonClass, Input, Textarea } from "@/components/ui/primitives";
 import { Card } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/toast";
@@ -13,7 +13,17 @@ import { renderAssignmentEmail, type AssignmentDigest } from "@/lib/domain/email
 import { cn } from "@/lib/utils";
 import type { Person } from "./assign-wizard";
 
-export function EmailPanel({ people, digests, configured, focus }: { people: Person[]; digests: AssignmentDigest[]; configured: boolean; focus: string | null }) {
+export interface EmailLogEntry {
+  id: string;
+  memberId: string;
+  ok: boolean;
+  summary: string;
+  createdAt: string;
+}
+
+const when = (iso: string) => new Date(iso).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+
+export function EmailPanel({ people, digests, emailLog, configured, focus }: { people: Person[]; digests: AssignmentDigest[]; emailLog: EmailLogEntry[]; configured: boolean; focus: string | null }) {
   const { settings } = useWorkspace();
   const toast = useToast();
   const [sending, start] = useTransition();
@@ -22,6 +32,8 @@ export function EmailPanel({ people, digests, configured, focus }: { people: Per
   const [selected, setSelected] = useStoredState<string[]>("lacc-email:selected", focus ? [focus] : []);
   const [previewId, setPreviewId] = useStoredState<string | null>("lacc-email:preview", focus ?? withTasks[0]?.memberId ?? null);
   const [note, setNote] = useStoredState("lacc-email:note", "");
+  const [check, setCheck] = useState<{ ok: boolean; message: string } | null>(null);
+  const [checking, startCheck] = useTransition();
   const [origin, setOrigin] = useState("");
   useEffect(() => setOrigin(window.location.origin), []);
   useEffect(() => {
@@ -60,13 +72,26 @@ export function EmailPanel({ people, digests, configured, focus }: { people: Per
         </div>
       )}
 
+      {configured && (
+        <div className="flex flex-wrap items-center gap-3 rounded-xl border border-line bg-panel-2 px-5 py-4 text-[15px]">
+          <ShieldCheck className="size-5 shrink-0 text-ok" />
+          <span className="min-w-0 flex-1 text-fg-2">Sending from this page is switched on. Not sure it works? Check the login first: this sends nothing.</span>
+          <Button size="sm" disabled={checking} onClick={() => startCheck(async () => setCheck(await checkEmailSettings()))}>{checking ? "Checking…" : "Check email settings"}</Button>
+          {check && (
+            <p role="status" className={cn("flex w-full items-start gap-2 text-[14px]", check.ok ? "text-ok" : "text-danger")}>
+              {check.ok ? <CheckCircle2 className="mt-0.5 size-4 shrink-0" /> : <XCircle className="mt-0.5 size-4 shrink-0" />} {check.message}
+            </p>
+          )}
+        </div>
+      )}
+
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
         <Card title="1. Who should get an email?" icon={<Mail />} subtitle="People with open tasks are at the top. Add an email address if it's missing.">
           <ul className="space-y-2">
             {[...people].sort((a, b) => count(b.id) - count(a.id)).map((p) => {
               const d = digests.find((x) => x.memberId === p.id);
               const n = d?.items.length ?? 0;
-              return <PersonRow key={p.id} p={p} n={n} active={previewId === p.id} checked={selected.includes(p.id)} onPreview={() => setPreviewId(p.id)} onCheck={(on) => setSelected(on ? [...selected, p.id] : selected.filter((x) => x !== p.id))} />;
+              return <PersonRow key={p.id} p={p} n={n} last={emailLog.find((e) => e.memberId === p.id)} active={previewId === p.id} checked={selected.includes(p.id)} onPreview={() => setPreviewId(p.id)} onCheck={(on) => setSelected(on ? [...selected, p.id] : selected.filter((x) => x !== p.id))} />;
             })}
           </ul>
           <label className="mt-6 block space-y-1.5">
@@ -103,11 +128,31 @@ export function EmailPanel({ people, digests, configured, focus }: { people: Per
           )}
         </Card>
       </div>
+
+      {emailLog.length > 0 && (
+        <Card title="Emails sent from this page" icon={<History />} subtitle="A sent email can't be taken back. To send it again, press Show again, check it, then send it yourself or press Send.">
+          <ul className="divide-y divide-line">
+            {emailLog.map((e) => {
+              const p = people.find((x) => x.id === e.memberId);
+              return (
+                <li key={e.id} className="flex flex-wrap items-center gap-3 py-3 text-[14px]">
+                  {e.ok ? <CheckCircle2 className="size-4 shrink-0 text-ok" /> : <XCircle className="size-4 shrink-0 text-danger" />}
+                  <span className="min-w-0 flex-1">
+                    <b>{e.ok ? "Sent" : "Failed"}</b> <span className="text-muted">· {when(e.createdAt)}</span>
+                    <span className="block text-fg-2">{e.summary}</span>
+                  </span>
+                  {p && <Button size="sm" variant="ghost" onClick={() => { setPreviewId(p.id); window.scrollTo({ top: 0, behavior: "smooth" }); }}><RotateCcw /> Show again</Button>}
+                </li>
+              );
+            })}
+          </ul>
+        </Card>
+      )}
     </div>
   );
 }
 
-function PersonRow({ p, n, active, checked, onPreview, onCheck }: { p: Person; n: number; active: boolean; checked: boolean; onPreview: () => void; onCheck: (on: boolean) => void }) {
+function PersonRow({ p, n, last, active, checked, onPreview, onCheck }: { p: Person; n: number; last?: EmailLogEntry; active: boolean; checked: boolean; onPreview: () => void; onCheck: (on: boolean) => void }) {
   const { run, pending } = useCommand();
   const [email, setEmail] = useState(p.email);
   useEffect(() => setEmail(p.email), [p.email]);
@@ -121,6 +166,7 @@ function PersonRow({ p, n, active, checked, onPreview, onCheck }: { p: Person; n
           <span className="min-w-0 flex-1">
             <span className="block truncate text-[16px] font-semibold">{p.name}</span>
             <span className="block text-[13px] text-muted">{n ? `${n} open task${n === 1 ? "" : "s"}` : "No open tasks"}</span>
+            {last && <span className={cn("block text-[13px]", last.ok ? "text-ok" : "text-danger")} title={last.summary}>{last.ok ? `Emailed ${when(last.createdAt)}` : `Last send failed ${when(last.createdAt)}`}</span>}
           </span>
         </button>
         {n > 0 && !p.email && <Badge tone="warn">Needs email</Badge>}
